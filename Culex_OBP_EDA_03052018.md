@@ -22,16 +22,19 @@ Leal_OBPs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqOBPs_sd01.csv", 
 sub_Leal_OBPs <- Leal_OBPs[,c(1:3)]
 
 merged_Fritz_OBP_dataset <- merge(genes_detected, sub_Leal_OBPs, by.x = "ID", by.y = "VectorBase_ID")
+```
+
+##### Because some OBPs are more widely expressed than others, I first wanted to understand how many were detected in my dataset. I did that but summing the number of reads that aligned to each OBP across all treatment groups.
+
+``` r
 merged_Fritz_OBP_dataset$sumCounts <- rowSums(merged_Fritz_OBP_dataset[,c(2:17)])
 head(merged_Fritz_OBP_dataset$sumCounts)#checking that rowSums worked
 ```
 
     ## [1]  7429 20298 50688  2180  1399  9299
 
-##### Because some OBPs are more widely expressed than others, I first wanted to understand how many were detected in my dataset. I did that but summing the number of reads that aligned to each OBP across all treatment groups.
-
 ``` r
-#getting only OBPs with certain number of reads aligned
+#getting numbers of OBPs according to overall number of reads aligned
 NROW(subset(merged_Fritz_OBP_dataset, sumCounts>=1))
 ```
 
@@ -65,7 +68,7 @@ sub_OBP_mod <- subset(merged_Fritz_OBP_dataset, sumCounts >=100 & sumCounts < 10
 sub_OBP_hi <- subset(merged_Fritz_OBP_dataset, sumCounts >=1000)
 ```
 
-##### I reshaped each dataframe from wide to long format, which allowed me to use sciplot to visualize the relationships between OBP expression and treatment group.
+##### I reshaped each dataframe from wide to long format, which was more conducive to plotting.
 
 ``` r
 #low
