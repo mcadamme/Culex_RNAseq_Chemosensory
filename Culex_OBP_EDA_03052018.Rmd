@@ -1,12 +1,12 @@
 ---
-title: "Culex_OBP_EDA_03052018"
+title: "Culex_Chemosensory_EDA_03052018"
 author: "Megan Fritz"
 date: "March 5, 2018"
 output: github_document
 ---
 
 ####Background
-#####The goal of this work was to examine the divergence in levels of OBP expression in the heads of above- and below-ground Culex pipiens mosquitoes.  These mosquitoes tend to have differing host preferences (see Fritz et. al 2015), where above-ground mosquitoes are more aviphilic and below-ground mosquitoes tend toward mammalophilicity. My primary question was which OBPs, if any, show differences in expression levels and thereby may be likely to be involved in host preference.  
+#####The goal of this work was to examine the divergence in levels of chemosensory gene expression in the heads of above- and below-ground Culex pipiens mosquitoes.  These mosquitoes tend to have differing host preferences (see Fritz et. al 2015), where above-ground mosquitoes are more aviphilic and below-ground mosquitoes tend toward mammalophilicity. My primary question was which OBPs, ORs, and IRs, if any, show differences in expression levels and thereby may be likely to be involved in host preference.  
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -14,6 +14,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ####Analytical Methods
+
+#####This is my bootstrapping function to generate my 95% confidence intervals for my figures.
+```{r writing bootstrapping function, results = "hide"}
+
+boot.fn <- function(x, N=5000) {
+  Int.1 <- replicate(N, mean(sample(x, size= length(x), replace=T)))
+  Int.CI <- quantile(Int.1, probs=c(0.025,0.975))
+  Int.CI
+}
+
+```
+
+
 #####Loading in data sets and libraries.
 ```{r Loading data sets and libraries, results = "show"}
 
@@ -22,15 +35,28 @@ library(sciplot)
 #use this to specify the path to your data file
 genes_detected <- read.table("~/Desktop/CulexRNAseq/data/all_genes_nocutoff_norm_counts.txt", header = T)
 Leal_OBPs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqOBPs_sd01.csv", header = T)
+Leal_ORs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqORs_sd04.csv", header = T)
+Leal_IRs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqIRs_sd03.csv", header = T)
 
-#just pulling out relevant columns from Leal_OBPs
+Leal_ORs$abbrev_VB_ID <- Leal_ORs$RefSeq
+Leal_ORs$abbrev_VB_ID <- gsub("-RA", "", Leal_ORs$abbrev_VB_ID)
+
+Leal_ORs$abbrev_VB_ID <- Leal_ORs$New_VB_ID
+Leal_ORs$abbrev_VB_ID <- gsub("-PA", "", Leal_ORs$abbrev_VB_ID)
+
+#just pulling out relevant columns from Leal_datasets
 sub_Leal_OBPs <- Leal_OBPs[,c(1:3)]
+sub_Leal_ORs <- Leal_ORs[,c(1,12)]
+sub_Leal_IRs <- Leal_IRs[,c(1:2)]
 
 merged_Fritz_OBP_dataset <- merge(genes_detected, sub_Leal_OBPs, by.x = "ID", by.y = "VectorBase_ID")
+merged_Fritz_OR_dataset <- merge(genes_detected, sub_Leal_ORs, by.x = "ID", by.y = "abbrev_VB_ID")
+merged_Fritz_IR_dataset <- merge(genes_detected, sub_Leal_IRs, by.x = "ID", by.y = "VectorBase_ID")
+
 
 ```
 
-#####Because some OBPs are more widely expressed than others, I first wanted to understand how many were detected in my dataset.  I did that but summing the number of reads that aligned to each OBP across all treatment groups. 
+#####Starting with OBPs. Because some OBPs are more widely expressed than others, I first wanted to understand how many were detected in my dataset.  I did that but summing the number of reads that aligned to each OBP across all treatment groups. 
 
 ```{r Examining subsets of OBP data, results = "show"}
 
@@ -122,18 +148,6 @@ sub_OBP_hi_reshaped$Rep = substr(sub_OBP_hi_reshaped$Rep,nchar(sub_OBP_hi_reshap
 
 ```
 
-#####This is my bootstrapping function to generate my 95% confidence intervals for my figures.
-```{r writing bootstrapping function, results = "hide"}
-
-boot.fn <- function(x, N=5000) {
-  Int.1 <- replicate(N, mean(sample(x, size= length(x), replace=T)))
-  Int.CI <- quantile(Int.1, probs=c(0.025,0.975))
-  Int.CI
-}
-
-```
-
-
 ####Results
 #####Finally, I used sciplot to view interactions between OBP expression and mosquito treatment group. 
 
@@ -158,4 +172,22 @@ lineplot.CI(CquiOBP, Norm_Read_Count, group = Strain, data = sub_OBP_hi_reshaped
             cex.lab =1.5, col = c("blue", "red", "black", "grey"), 
             pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
             
+```
+
+#####Now turning to ORs. As with OBPs, I want to understand how many ORs I can detect in my dataset. 
+
+```{r Examining subsets of OR data, results = "show"}
+
+merged_Fritz_OR_dataset$sumCounts <- rowSums(merged_Fritz_OR_dataset[,c(2:17)])
+head(merged_Fritz_OR_dataset$sumCounts)#checking that rowSums worked
+
+#getting numbers of ORs according to overall number of reads aligned
+NROW(subset(merged_Fritz_OR_dataset, sumCounts>=1))
+
+NROW(subset(merged_Fritz_OR_dataset, sumCounts>=10))
+
+NROW(subset(merged_Fritz_OR_dataset, sumCounts>=100))
+
+NROW(subset(merged_Fritz_OR_dataset, sumCounts>=1000))
+
 ```

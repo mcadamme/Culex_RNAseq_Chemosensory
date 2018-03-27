@@ -1,11 +1,11 @@
-Culex\_OBP\_EDA\_03052018
+Culex\_Chemosensory\_EDA\_03052018
 ================
 Megan Fritz
 March 5, 2018
 
 #### Background
 
-##### The goal of this work was to examine the divergence in levels of OBP expression in the heads of above- and below-ground Culex pipiens mosquitoes. These mosquitoes tend to have differing host preferences (see Fritz et. al 2015), where above-ground mosquitoes are more aviphilic and below-ground mosquitoes tend toward mammalophilicity. My primary question was which OBPs, if any, show differences in expression levels and thereby may be likely to be involved in host preference.
+##### The goal of this work was to examine the divergence in levels of chemosensory gene expression in the heads of above- and below-ground Culex pipiens mosquitoes. These mosquitoes tend to have differing host preferences (see Fritz et. al 2015), where above-ground mosquitoes are more aviphilic and below-ground mosquitoes tend toward mammalophilicity. My primary question was which OBPs, ORs, and IRs, if any, show differences in expression levels and thereby may be likely to be involved in host preference.
 
 #### Analytical Methods
 
@@ -17,11 +17,17 @@ library(sciplot)
 #use this to specify the path to your data file
 genes_detected <- read.table("~/Desktop/CulexRNAseq/data/all_genes_nocutoff_norm_counts.txt", header = T)
 Leal_OBPs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqOBPs_sd01.csv", header = T)
+Leal_ORs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqORs_sd04.csv", header = T)
+Leal_IRs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqIRs_sd03.csv", header = T)
 
 #just pulling out relevant columns from Leal_OBPs
 sub_Leal_OBPs <- Leal_OBPs[,c(1:3)]
+sub_Leal_ORs <- Leal_ORs[,c(1:3)]
+sub_Leal_IRs <- Leal_IRs[,c(1:2)]
 
 merged_Fritz_OBP_dataset <- merge(genes_detected, sub_Leal_OBPs, by.x = "ID", by.y = "VectorBase_ID")
+merged_Fritz_OR_dataset <- merge(genes_detected, sub_Leal_ORs, by.x = "ID", by.y = "New_VB_ID")
+merged_Fritz_IR_dataset <- merge(genes_detected, sub_Leal_IRs, by.x = "ID", by.y = "VectorBase_ID")
 ```
 
 ##### Because some OBPs are more widely expressed than others, I first wanted to understand how many were detected in my dataset. I did that but summing the number of reads that aligned to each OBP across all treatment groups.
