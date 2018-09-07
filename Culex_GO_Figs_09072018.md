@@ -41,6 +41,7 @@ Rounded_Percentages <- round(Percentages, 1)
 
 ``` r
 lbls <- c(as.character(DGC_MF_grVpa$GO), "Miscellaneous")
+lbls <- gsub("structural constituent of ribosome", "struc const ribosome", lbls)
 lbls <- paste(lbls, Rounded_Percentages$DGC_MF_grVpa) # add percents to labels
 lbls <- paste(lbls,"%",sep="") # ad % to labels 
 grVpa_pie <- pie(Rounded_Percentages$DGC_MF_grVpa, labels =lbls, main = "Top Molecular Function GO Level 3 Categories for Gravid CAL1 versus Parous CAL1 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, clockwise = T)
@@ -50,6 +51,7 @@ grVpa_pie <- pie(Rounded_Percentages$DGC_MF_grVpa, labels =lbls, main = "Top Mol
 
 ``` r
 lbls <- c(as.character(DGC_MF_paVma$GO), "Miscellaneous")
+lbls <- gsub("structural constituent of ribosome", "struc const ribosome", lbls)
 lbls <- paste(lbls, Rounded_Percentages$DGC_MF_paVma) 
 lbls <- paste(lbls,"%",sep="") 
 paVma_pie <- pie(Rounded_Percentages$DGC_MF_paVma, labels =lbls, main = "Top Molecular Function GO Level 3 Categories for Parous CAL1 versus Male CAL1 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, clockwise = T)
@@ -59,6 +61,8 @@ paVma_pie <- pie(Rounded_Percentages$DGC_MF_paVma, labels =lbls, main = "Top Mol
 
 ``` r
 lbls <- c(as.character(DGC_MF_paVpip$GO), "Miscellaneous")
+lbls <- gsub("structural constituent of ribosome", "struc const ribosome", lbls)
+lbls <- gsub("serine-type endopeptidase activity", "ser-type endopep act", lbls)
 lbls <- paste(lbls, Rounded_Percentages$DGC_MF_paVpip) 
 lbls <- paste(lbls,"%",sep="") 
 paVpip_pie <- pie(Rounded_Percentages$DGC_MF_paVpip, labels =lbls, main = "Top Molecular Function GO Level 3 Categories for Parous CAL1 versus IL2 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, clockwise = T)
@@ -68,6 +72,8 @@ paVpip_pie <- pie(Rounded_Percentages$DGC_MF_paVpip, labels =lbls, main = "Top M
 
 ``` r
 lbls <- c(as.character(DGC_MF_grVpip$GO), "Miscellaneous")
+lbls <- gsub("structural constituent of ribosome", "struc const ribosome", lbls)
+lbls <- gsub("serine-type endopeptidase activity", "ser-type endopep act", lbls)
 lbls <- paste(lbls, Rounded_Percentages$DGC_MF_grVpip) 
 lbls <- paste(lbls,"%",sep="") 
 grVpip_pie <- pie(Rounded_Percentages$DGC_MF_grVpip, labels =lbls, main = "Top Molecular Function GO Level 3 Categories for Gravid CAL1 versus IL2 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, clockwise = T)
