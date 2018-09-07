@@ -16,13 +16,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(rlist)
 
-setwd("~/Desktop/CulexRNAseq/data/Culex_DGE_Blast2GO_output/GO_data_analyses/")
+setwd("~/Desktop/CulexRNAseq")
 
 #Getting the top 9 categories
-DGC_MF_grVpa <- read.table("./gravid_v_parous/DGC_MF_grVpa.txt", nrows = 9, sep = "\t", header = T)
-DGC_MF_paVma <- read.table("./parous_v_males/DGC_MF_paVma.txt", nrows = 9, sep = "\t", header = T)
-DGC_MF_paVpip <- read.table("./parous_v_pipiens/DGC_MF_paVpip.txt", nrows = 9, sep = "\t", header = T)
-DGC_MF_grVpip <- read.table("./gravid_v_pipiens/DGC_MF_grVpip.txt", nrows = 9, sep = "\t", header = T)
+DGC_MF_grVpa <- read.table("./data/Culex_DGE_Blast2GO_output/GO_data_analyses/gravid_v_parous/DGC_MF_grVpa.txt", nrows = 9, sep = "\t", header = T)
+DGC_MF_paVma <- read.table("./data/Culex_DGE_Blast2GO_output/GO_data_analyses/parous_v_males/DGC_MF_paVma.txt", nrows = 9, sep = "\t", header = T)
+DGC_MF_paVpip <- read.table("./data/Culex_DGE_Blast2GO_output/GO_data_analyses/parous_v_pipiens/DGC_MF_paVpip.txt", nrows = 9, sep = "\t", header = T)
+DGC_MF_grVpip <- read.table("./data/Culex_DGE_Blast2GO_output/GO_data_analyses/gravid_v_pipiens/DGC_MF_grVpip.txt", nrows = 9, sep = "\t", header = T)
 
 data <- list(DGC_MF_grVpa$X, DGC_MF_paVma$X, DGC_MF_paVpip$X, DGC_MF_grVpip$X)
 tot <- c(625,1744,3174,3327)
