@@ -138,7 +138,7 @@ grVpip_pie_MF <- pie(Rounded_Percentages_MF$DGC_MF_grVpip, labels =lbls, main = 
 
 ###### "regulation of transcription, DNA-templated" = "reg transcript, DNA-temp"
 
-###### "carbohydrate metabolic process", "carb metabol proc"
+###### "carbohydrate metabolic process" = "carb metabol proc"
 
 ``` r
 lbls <- c(as.character(DGC_BP_grVpa$GO), "Miscellaneous")
@@ -189,7 +189,7 @@ grVpip_pie_BP <- pie(Rounded_Percentages_BP$DGC_BP_grVpip, labels =lbls, main = 
 
 ###### "regulation of transcription, DNA-templated" = "reg transcript, DNA-temp"
 
-###### "carbohydrate metabolic process", "carb metabol proc"
+###### "carbohydrate metabolic process" = "carb metabol proc"
 
 ``` r
 col_schema <- c("blue3", "blue2", "blue", "deepskyblue", "lightblue", "orange", "yellow3", "yellow2", "yellow", "lightyellow")
@@ -198,7 +198,7 @@ lbls <- c(as.character(DGC_CC_grVpa$GO), "Miscellaneous")
 lbls <- gsub("regulation of transcription, DNA-templated", "reg transcript, DNA-temp", lbls)
 lbls <- paste(lbls, Rounded_Percentages_CC$DGC_CC_grVpa) # add percents to labels
 lbls <- paste(lbls,"%",sep="") # ad % to labels 
-grVpa_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_grVpa, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Gravid CAL1 versus Parous CAL1 Comparison", radius = 1, cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
+grVpa_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_grVpa, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Gravid CAL1 versus Parous CAL1 Comparison", radius = 1.05, cex = 0.6, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
 ```
 
 ![](Culex_GO_Figs_09072018_files/figure-markdown_github/CC%20GO%20Figs-1.png)
@@ -209,7 +209,7 @@ lbls <- gsub("regulation of transcription, DNA-templated", "reg transcript, DNA-
 lbls <- gsub("carbohydrate metabolic process", "carb metabol proc", lbls)
 lbls <- paste(lbls, Rounded_Percentages_CC$DGC_CC_paVma) 
 lbls <- paste(lbls,"%",sep="") 
-paVma_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_paVma, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Parous CAL1 versus Male CAL1 Comparison", radius = 1, cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
+paVma_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_paVma, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Parous CAL1 versus Male CAL1 Comparison", radius = 1.05, cex = 0.6, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
 ```
 
 ![](Culex_GO_Figs_09072018_files/figure-markdown_github/CC%20GO%20Figs-2.png)
@@ -220,7 +220,7 @@ lbls <- gsub("regulation of transcription, DNA-templated", "reg transcript, DNA-
 lbls <- gsub("carbohydrate metabolic process", "carb metabol proc", lbls)
 lbls <- paste(lbls, Rounded_Percentages_CC$DGC_CC_paVpip) 
 lbls <- paste(lbls,"%",sep="") 
-paVpip_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_paVpip, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Parous CAL1 versus IL2 Comparison", radius = 1,  cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
+paVpip_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_paVpip, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Parous CAL1 versus IL2 Comparison", radius = 1.05,  cex = 0.6, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
 ```
 
 ![](Culex_GO_Figs_09072018_files/figure-markdown_github/CC%20GO%20Figs-3.png)
@@ -231,7 +231,7 @@ lbls <- gsub("regulation of transcription, DNA-templated", "reg transcript, DNA-
 lbls <- gsub("carbohydrate metabolic process", "carb metabol proc", lbls)
 lbls <- paste(lbls, Rounded_Percentages_CC$DGC_CC_grVpip) 
 lbls <- paste(lbls,"%",sep="") 
-grVpip_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_grVpip, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Gravid CAL1 versus IL2 Comparison", radius = 1, cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
+grVpip_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_grVpip, labels =lbls, main = "Top Cellular Component GO Level 3 Categories for Gravid CAL1 versus IL2 Comparison", radius = 1.05, cex = 0.6, cex.main = 0.75, tck=.2, init.angle = 30, col= col_schema)
 ```
 
 ![](Culex_GO_Figs_09072018_files/figure-markdown_github/CC%20GO%20Figs-4.png)
