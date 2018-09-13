@@ -12,14 +12,15 @@ Plots for Gene Ontology Classification.
 setwd("~/Desktop/CulexRNAseq")
 
 #Getting the top 14 MF categories
+Parous_only <- read.table("./data/GO_analysis_parous_all/parous_all_GO_Dist_Level3_first3cols_MF.txt", sep = "\t", header = T)
 DGC_MF_grVpa <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVparous/gravidVparous_GODist_level3_first3colsMF.txt", sep = "\t", header = T)
 DGC_MF_paVma <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVmales/parousVmales_GODist_level3_first3cols_MF.txt", sep = "\t", header = T)
 DGC_MF_paVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVpipiens/parousVpipiens_GODist_level3_first3cols_MF.txt", sep = "\t", header = T)
 DGC_MF_grVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVpipiens/gravidVpipiens_GODist_level3_first3cols_MF.txt", sep = "\t", header = T)
 
-top_14_MF <- list(DGC_MF_grVpa[c(1:14),3], DGC_MF_paVma[c(1:14),3], DGC_MF_paVpip[c(1:14),3], DGC_MF_grVpip[c(1:14),3])
+top_14_MF <- list(Parous_only[c(1:14),3],DGC_MF_grVpa[c(1:14),3], DGC_MF_paVma[c(1:14),3], DGC_MF_paVpip[c(1:14),3], DGC_MF_grVpip[c(1:14),3])
 
-tot_data_MF <- list(DGC_MF_grVpa[c(1:nrow(DGC_MF_grVpa)),3], DGC_MF_paVma[c(1:nrow(DGC_MF_paVma)),3], DGC_MF_paVpip[c(1:nrow(DGC_MF_paVpip)),3], DGC_MF_grVpip[c(1:nrow(DGC_MF_grVpip)),3])
+tot_data_MF <- list(Parous_only[c(1:nrow(Parous_only)),3],DGC_MF_grVpa[c(1:nrow(DGC_MF_grVpa)),3], DGC_MF_paVma[c(1:nrow(DGC_MF_paVma)),3], DGC_MF_paVpip[c(1:nrow(DGC_MF_paVpip)),3], DGC_MF_grVpip[c(1:nrow(DGC_MF_grVpip)),3])
 
 
 #Getting the top 14 BP categories
@@ -51,7 +52,7 @@ tot_MF <- lapply(tot_data_MF, sum)
 inv_misc_cat_MF <- lapply(top_14_MF, sum)
 misc_cat_MF <- (unlist(tot_MF)) - (unlist(inv_misc_cat_MF))
 
-data2_MF <- as.data.frame(top_14_MF, col.names = c("DGC_MF_grVpa", "DGC_MF_paVma", "DGC_MF_paVpip", "DGC_MF_grVpip"))
+data2_MF <- as.data.frame(top_14_MF, col.names = c("Parous_only","DGC_MF_grVpa", "DGC_MF_paVma", "DGC_MF_paVpip", "DGC_MF_grVpip"))
 
 Updata_MF <- rbind(data2_MF, misc_cat_MF)
 
@@ -102,6 +103,18 @@ Rounded_Percentages_CC <- round(Percentages_CC, 1)
 ###### "substrate-specific transporter activity" = "sub-spec transport act"
 
 ``` r
+lbls <- c(as.character(Parous_only[c(1:14),2]), "Miscellaneous")
+lbls <- gsub("structural constituent of ribosome", "struc const ribosome", lbls)
+lbls <- gsub("guanyl-nucleotide exchange factor", "guan-nuc ex factor", lbls)
+lbls <- gsub("substrate-specific transporter activity", "sub-spec transport act", lbls)
+lbls <- paste(lbls, Rounded_Percentages_MF$Parous_only) # add percents to labels
+lbls <- paste(lbls,"%",sep="") # ad % to labels 
+ParO_pie_MF <- pie(Rounded_Percentages_MF$Parous_only, labels =lbls, main = "Top Molecular Function GO Categories for Parous CAL1", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30)
+```
+
+![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-1.png)
+
+``` r
 lbls <- c(as.character(DGC_MF_grVpa[c(1:14),2]), "Miscellaneous")
 lbls <- gsub("structural constituent of ribosome", "struc const ribosome", lbls)
 lbls <- gsub("guanyl-nucleotide exchange factor", "guan-nuc ex factor", lbls)
@@ -111,7 +124,7 @@ lbls <- paste(lbls,"%",sep="") # ad % to labels
 grVpa_pie_MF <- pie(Rounded_Percentages_MF$DGC_MF_grVpa, labels =lbls, main = "Top Molecular Function GO Categories for Gravid CAL1 versus Parous CAL1 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30)
 ```
 
-![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-1.png)
+![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-2.png)
 
 ``` r
 lbls <- c(as.character(DGC_MF_paVma[c(1:14),2]), "Miscellaneous")
@@ -123,7 +136,7 @@ lbls <- paste(lbls,"%",sep="")
 paVma_pie_MF <- pie(Rounded_Percentages_MF$DGC_MF_paVma, labels =lbls, main = "Top Molecular Function GO Categories for Parous CAL1 versus Male CAL1 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30)
 ```
 
-![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-2.png)
+![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-3.png)
 
 ``` r
 lbls <- c(as.character(DGC_MF_paVpip[c(1:14),2]), "Miscellaneous")
@@ -136,7 +149,7 @@ lbls <- paste(lbls,"%",sep="")
 paVpip_pie_MF <- pie(Rounded_Percentages_MF$DGC_MF_paVpip, labels =lbls, main = "Top Molecular Function GO Categories for Parous CAL1 versus IL2 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30)
 ```
 
-![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-3.png)
+![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-4.png)
 
 ``` r
 lbls <- c(as.character(DGC_MF_grVpip[c(1:14),2]), "Miscellaneous")
@@ -149,7 +162,7 @@ lbls <- paste(lbls,"%",sep="")
 grVpip_pie_MF <- pie(Rounded_Percentages_MF$DGC_MF_grVpip, labels =lbls, main = "Top Molecular Function GO Categories for Gravid CAL1 versus IL2 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30)
 ```
 
-![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-4.png)
+![](Culex_GO_Figs_09072018_files/figure-markdown_github/MF%20GO%20Figs-5.png)
 
 ##### Biological Process GO Comparison Charts
 
