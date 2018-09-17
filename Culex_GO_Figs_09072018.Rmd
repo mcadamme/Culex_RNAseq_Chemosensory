@@ -21,11 +21,10 @@ Parous_only <- read.table("./data/GO_analysis_parous_all/parous_all_GO_Dist_Leve
 DGC_MF_grVpa <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVparous/gravidVparous_GODist_level3_first3colsMF.txt", sep = "\t", header = T)
 DGC_MF_paVma <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVmales/parousVmales_GODist_level3_first3cols_MF.txt", sep = "\t", header = T)
 DGC_MF_paVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVpipiens/parousVpipiens_GODist_level3_first3cols_MF.txt", sep = "\t", header = T)
-DGC_MF_grVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVpipiens/gravidVpipiens_GODist_level3_first3cols_MF.txt", sep = "\t", header = T)
 
-top_14_MF <- list(Parous_only[c(1:14),3],DGC_MF_grVpa[c(1:14),3], DGC_MF_paVma[c(1:14),3], DGC_MF_paVpip[c(1:14),3], DGC_MF_grVpip[c(1:14),3])
+top_14_MF <- list(Parous_only[c(1:14),3],DGC_MF_grVpa[c(1:14),3], DGC_MF_paVma[c(1:14),3], DGC_MF_paVpip[c(1:14),3])
 
-tot_data_MF <- list(Parous_only[c(1:nrow(Parous_only)),3],DGC_MF_grVpa[c(1:nrow(DGC_MF_grVpa)),3], DGC_MF_paVma[c(1:nrow(DGC_MF_paVma)),3], DGC_MF_paVpip[c(1:nrow(DGC_MF_paVpip)),3], DGC_MF_grVpip[c(1:nrow(DGC_MF_grVpip)),3])
+tot_data_MF <- list(Parous_only[c(1:nrow(Parous_only)),3],DGC_MF_grVpa[c(1:nrow(DGC_MF_grVpa)),3], DGC_MF_paVma[c(1:nrow(DGC_MF_paVma)),3], DGC_MF_paVpip[c(1:nrow(DGC_MF_paVpip)),3])
 
 
 #Getting the top 14 BP categories
@@ -33,22 +32,20 @@ Parous_only_BP <- read.table("./data/GO_analysis_parous_all/parous_all_GO_Dist_L
 DGC_BP_grVpa <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVparous/gravidVparous_GODist_level3_first3cols_BP.txt", sep = "\t", header = T)
 DGC_BP_paVma <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVmales/parousVmales_GODist_level3_first3cols_BP.txt", sep = "\t", header = T)
 DGC_BP_paVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVpipiens/parousVpipiens_GODist_level3_first3cols_BP.txt", sep = "\t", header = T)
-DGC_BP_grVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVpipiens/gravidVpipiens_GODist_level3_first3cols_BP.txt", sep = "\t", header = T)
 
-top_14_BP <- list(Parous_only_BP[c(1:14),3],DGC_BP_grVpa[c(1:14),3], DGC_BP_paVma[c(1:14),3], DGC_BP_paVpip[c(1:14),3], DGC_BP_grVpip[c(1:14),3])
+top_14_BP <- list(Parous_only_BP[c(1:14),3],DGC_BP_grVpa[c(1:14),3], DGC_BP_paVma[c(1:14),3], DGC_BP_paVpip[c(1:14),3])
 
-tot_data_BP <- list(Parous_only_BP[c(1:nrow(Parous_only_BP)),3],DGC_BP_grVpa[c(1:nrow(DGC_BP_grVpa)),3], DGC_BP_paVma[c(1:nrow(DGC_BP_paVma)),3], DGC_BP_paVpip[c(1:nrow(DGC_BP_paVpip)),3], DGC_BP_grVpip[c(1:nrow(DGC_BP_grVpip)),3])
+tot_data_BP <- list(Parous_only_BP[c(1:nrow(Parous_only_BP)),3],DGC_BP_grVpa[c(1:nrow(DGC_BP_grVpa)),3], DGC_BP_paVma[c(1:nrow(DGC_BP_paVma)),3], DGC_BP_paVpip[c(1:nrow(DGC_BP_paVpip)),3])
 
 
 #Getting the top 14 CC categories
 DGC_CC_grVpa <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVparous/gravidVparous_GODist_level3_first3cols_CC.txt", sep = "\t", header = T)
 DGC_CC_paVma <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVmales/parousVmales_GODist_level3_first3cols_CC.txt", sep = "\t", header = T)
 DGC_CC_paVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/parousVpipiens/parousVpipiens_GODist_level3_first3cols_CC.txt", sep = "\t", header = T)
-DGC_CC_grVpip <- read.table("./data/GO_level3Dist_data_analysis_09102018/gravidVpipiens/gravidVpipiens_GODist_level3_first3cols_CC.txt", sep = "\t", header = T)
 
-top_14_CC <- list(DGC_CC_grVpa[c(1:14),3], DGC_CC_paVma[c(1:14),3], DGC_CC_paVpip[c(1:14),3], DGC_CC_grVpip[c(1:14),3])
+top_14_CC <- list(DGC_CC_grVpa[c(1:14),3], DGC_CC_paVma[c(1:14),3], DGC_CC_paVpip[c(1:14),3])
 
-tot_data_CC <- list(DGC_CC_grVpa[c(1:nrow(DGC_CC_grVpa)),3], DGC_CC_paVma[c(1:nrow(DGC_CC_paVma)),3], DGC_CC_paVpip[c(1:nrow(DGC_CC_paVpip)),3], DGC_CC_grVpip[c(1:nrow(DGC_CC_grVpip)),3])
+tot_data_CC <- list(DGC_CC_grVpa[c(1:nrow(DGC_CC_grVpa)),3], DGC_CC_paVma[c(1:nrow(DGC_CC_paVma)),3], DGC_CC_paVpip[c(1:nrow(DGC_CC_paVpip)),3])
 
 
 
@@ -61,7 +58,7 @@ tot_MF <- lapply(tot_data_MF, sum)
 inv_misc_cat_MF <- lapply(top_14_MF, sum)
 misc_cat_MF <- (unlist(tot_MF)) - (unlist(inv_misc_cat_MF))
 
-data2_MF <- as.data.frame(top_14_MF, col.names = c("Parous_only","DGC_MF_grVpa", "DGC_MF_paVma", "DGC_MF_paVpip", "DGC_MF_grVpip"))
+data2_MF <- as.data.frame(top_14_MF, col.names = c("Parous_only","DGC_MF_grVpa", "DGC_MF_paVma", "DGC_MF_paVpip"))
 
 Updata_MF <- rbind(data2_MF, misc_cat_MF)
 
@@ -77,7 +74,7 @@ tot_BP <- lapply(tot_data_BP, sum)
 inv_misc_cat_BP <- lapply(top_14_BP, sum)
 misc_cat_BP <- (unlist(tot_BP)) - (unlist(inv_misc_cat_BP))
 
-data2_BP <- as.data.frame(top_14_BP, col.names = c("Parous_only","DGC_BP_grVpa", "DGC_BP_paVma", "DGC_BP_paVpip", "DGC_BP_grVpip"))
+data2_BP <- as.data.frame(top_14_BP, col.names = c("Parous_only","DGC_BP_grVpa", "DGC_BP_paVma", "DGC_BP_paVpip"))
 
 Updata_BP <- rbind(data2_BP, misc_cat_BP)
 
@@ -93,7 +90,7 @@ tot_CC <- lapply(tot_data_CC, sum)
 inv_misc_cat_CC <- lapply(top_14_CC, sum)
 misc_cat_CC <- (unlist(tot_CC)) - (unlist(inv_misc_cat_CC))
 
-data2_CC <- as.data.frame(top_14_CC, col.names = c("DGC_CC_grVpa", "DGC_CC_paVma", "DGC_CC_paVpip", "DGC_CC_grVpip"))
+data2_CC <- as.data.frame(top_14_CC, col.names = c("DGC_CC_grVpa", "DGC_CC_paVma", "DGC_CC_paVpip"))
 
 Updata_CC <- rbind(data2_CC, misc_cat_CC)
 
@@ -151,15 +148,6 @@ lbls <- paste(lbls, Rounded_Percentages_MF$DGC_MF_paVpip)
 lbls <- paste(lbls,"%",sep="") 
 paVpip_pie_MF <- pie(Rounded_Percentages_MF$DGC_MF_paVpip, labels =lbls, main = "Top Molecular Function GO Categories for Parous CAL1 versus IL2 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30)
 
-lbls <- c(as.character(DGC_MF_grVpip[c(1:14),2]), "Miscellaneous")
-lbls <- gsub("structural constituent of ribosome", "struc const ribosome", lbls)
-lbls <- gsub("serine-type endopeptidase activity", "ser-type endopep act", lbls)
-lbls <- gsub("guanyl-nucleotide exchange factor", "guan-nuc ex factor", lbls)
-lbls <- gsub("substrate-specific transporter activity", "sub-spec transport act", lbls)
-lbls <- gsub("transmembrane transporter activity", "transmem transp act", lbls)
-lbls <- paste(lbls, Rounded_Percentages_MF$DGC_MF_grVpip) 
-lbls <- paste(lbls,"%",sep="") 
-grVpip_pie_MF <- pie(Rounded_Percentages_MF$DGC_MF_grVpip, labels =lbls, main = "Top Molecular Function GO Categories for Gravid CAL1 versus IL2 Comparison", radius = 0.9, col = rainbow(length(lbls)), cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 30)
 
 ```
 
@@ -211,15 +199,6 @@ lbls <- paste(lbls, Rounded_Percentages_BP$DGC_BP_paVpip)
 lbls <- paste(lbls,"%",sep="") 
 paVpip_pie_BP <- pie(Rounded_Percentages_BP$DGC_BP_paVpip, labels =lbls, main = "Top Biological Process GO Categories for Parous CAL1 versus IL2 Comparison", radius = 0.9,  cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 120)
 
-lbls <- c(as.character(DGC_BP_grVpip[c(1:14),2]), "Miscellaneous")
-lbls <- gsub("regulation of transcription, DNA-templated", "reg transcript, DNA-temp", lbls)
-lbls <- gsub("carbohydrate metabolic process", "carb metabol proc", lbls)
-lbls <- gsub("establishment of localization", "establish localization", lbls)
-lbls <- gsub("single-organism cellular process", "single-org cell process", lbls)
-lbls <- gsub("single-organism metabolic process", "single-org metabol process", lbls)
-lbls <- paste(lbls, Rounded_Percentages_BP$DGC_BP_grVpip) 
-lbls <- paste(lbls,"%",sep="") 
-grVpip_pie_BP <- pie(Rounded_Percentages_BP$DGC_BP_grVpip, labels =lbls, main = "Top Biological Process GO Categories for Gravid CAL1 versus IL2 Comparison", radius = 0.9, cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 120)
 
 ```
 
@@ -266,14 +245,6 @@ lbls <- paste(lbls, Rounded_Percentages_CC$DGC_CC_paVpip)
 lbls <- paste(lbls,"%",sep="") 
 paVpip_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_paVpip, labels =lbls, main = "Top Cellular Component GO Categories for Parous CAL1 versus IL2 Comparison", radius = 0.9,  cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 50, col= col_schema)
 
-lbls <- c(as.character(DGC_CC_grVpip[c(1:9),2]), "Miscellaneous")
-lbls <- gsub("regulation of transcription, DNA-templated", "reg transcript, DNA-temp", lbls)
-lbls <- gsub("membrane-bounded organelle", "membrane-bounded org", lbls)
-lbls <- gsub("non-membrane-bounded organelle", "non-membrane-bounded org", lbls)
-lbls <- gsub("carbohydrate metabolic process", "carb metabol proc", lbls)
-lbls <- gsub("intrinsic component of membrane", "intrins comp membr", lbls)
-lbls <- paste(lbls, Rounded_Percentages_CC$DGC_CC_grVpip) 
-lbls <- paste(lbls,"%",sep="") 
-grVpip_pie_CC <- pie(Rounded_Percentages_CC$DGC_CC_grVpip, labels =lbls, main = "Top Cellular Component GO Categories for Gravid CAL1 versus IL2 Comparison", radius = 0.9, cex = 0.75, cex.main = 0.75, tck=.2, init.angle = 50, col= col_schema)
+
 
 ```
