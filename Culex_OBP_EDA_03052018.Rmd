@@ -1,7 +1,7 @@
 ---
 title: "Culex_Chemosensory_EDA_03052018"
 author: "Megan Fritz"
-date: "March 5, 2018"
+date: "written March 5, 2018; updated Dec. 10, 2020"
 output: github_document
 ---
 
@@ -33,27 +33,71 @@ boot.fn <- function(x, N=5000) {
 library(sciplot)
 
 #use this to specify the file paths
-genes_detected <- read.table("~/Desktop/CulexRNAseq/data/all_genes_nocutoff_norm_counts.txt", header = T)
-Leal_OBPs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqOBPs_sd01.csv", header = T)
-Leal_ORs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqORs_sd04.csv", header = T)
-Leal_IRs <- read.csv("~/Desktop/CulexRNAseq/data/Leal2011_QuinqIRs_sd03.csv", header = T)
-Sig_CALG_CALP <- read.csv("~/Desktop/CulexRNAseq/data/CALgravidF_v_CALparousF_padj05.csv", header = T)
-Sig_CALP_CALM <- read.csv("~/Desktop/CulexRNAseq/data/CALparousF_v_CALM_padj05.csv", header = T)
-Sig_CALP_Pip <- read.csv("~/Desktop/CulexRNAseq/data/CALparousF_v_PipEvanF_padj05.csv", header = T)
+genes_detected <- read.table("~/Desktop/CulexRNAseq/data/CALparousF_v_PipEvanF_AllGenes_LFCS.txt", header = F)#using LCFS for the parous v pip contrast
+genes_detected$abbrev_VB_ID <- gsub("-RA", "", genes_detected$V1) #removing mods to VB ID
+
+gff3 <- read.table("~/Desktop/CulexRNAseq/data/Culex-quinquefasciatus-Johannesburg_BASEFEATURES_CpipJ2.4.gff3", sep="\t", stringsAsFactors=F)
+
+genes_only <-subset(gff3, V3 =="gene")
+
+norm_read_counts <- read.table("~/Desktop/CulexRNAseq/data/Normalized_ReadCounts_CalParVPip.txt", header = T)#note this is for parousvpip; added later because most of the gravid v parous contrasts are not interesting for this part.
+
+ids <- sapply(strsplit(genes_only$V9,";"),.subset,1)
+ID <- sapply(strsplit(ids, "="),.subset,2)
+gene_name <- sapply(strsplit(genes_only$V9,";"),.subset,2)
+gene_name2 <- sapply(strsplit(gene_name, "="),.subset,2)
+gene_desc <- sapply(strsplit(genes_only$V9,";"),.subset,3)
+gene_desc2 <- sapply(strsplit(gene_desc, "="),.subset,2)
+ids3 <- data.frame(cbind(ID,gene_name2,gene_desc2))
+
+#adding all gene descriptions to genes detected
+merged_Fritz_detected <- merge(genes_detected, ids3, by.x = "abbrev_VB_ID", by.y = "ID")
+
+#adding readcounts to merged dataset
+merged_Fritz_withCounts <- merge(merged_Fritz_detected, norm_read_counts, by.x = "abbrev_VB_ID", by.y = "Name")
 
 
-Leal_ORs$abbrev_VB_ID <- Leal_ORs$New_VB_ID 
-Leal_ORs$abbrev_VB_ID <- gsub("-PA", "", Leal_ORs$abbrev_VB_ID) #removing mods to VB ID
+OBPs <- read.csv("~/Desktop/CulexRNAseq/data/Culex_OBPs_2013.csv", header = T) #seem to be missing one OBP here.
+ORs <- read.csv("~/Desktop/CulexRNAseq/data/QuinqORs.csv", header = T)
+IRs <- read.csv("~/Desktop/CulexRNAseq/data/QuinqIRs.csv", header = T)
+GRs <- read.csv("~/Desktop/CulexRNAseq/data/GR_download_20190311121015.csv", header = T)#downloaded from VB on 3/11/2019
+CSPs <- read.csv("~/Desktop/CulexRNAseq/data/Culex_CSPs_2013_edited.csv", header = T)
+PPKs <- read.csv("~/Desktop/CulexRNAseq/data/Pickpocket_download_20190311162142.csv", header = T)
+
+Sig_CALG_CALP <- read.table("~/Desktop/CulexRNAseq/data/CALgravidF_v_CALparousF_LFCS_padj05.txt", header = F)
+Sig_CALG_CALP$abbrev_VB_ID <- gsub("-RA", "", Sig_CALG_CALP$V1) #removing mods to VB ID
+
+Sig_CALP_Pip <- read.table("~/Desktop/CulexRNAseq/data/CALparousF_v_PipEvanF_LFCS_padj05.txt", header = F)
+Sig_CALP_Pip$abbrev_VB_ID <- gsub("-RA", "", Sig_CALP_Pip$V1) #removing mods to VB ID
+
+#now adding gene descriptions to ALL diff expressed genes for browsing
+merged_CALG_CALP <- merge(Sig_CALG_CALP, ids3, by.x = "abbrev_VB_ID", by.y = "ID")
+merged_CALP_Pip <- merge(Sig_CALP_Pip, ids3, by.x = "abbrev_VB_ID", by.y = "ID")
+
+ORs$abbrev_VB_ID <- ORs$New_VB_ID 
+ORs$abbrev_VB_ID <- gsub("-PA", "", ORs$abbrev_VB_ID) #removing mods to VB ID
+
+#making SNMP dataset
+accession <- c("CPIJ002160", "CPIJ014332", "CPIJ014331", "CPIJ014330")
+SNMP_name <- c("SNMP2", "SNMP1c", "SNMP1b", "SNMP1a")
+SNMPs <- data.frame(cbind(accession, SNMP_name))
 
 #just pulling out relevant columns from Leal_datasets
-sub_Leal_OBPs <- Leal_OBPs[,c(1:3)]
-sub_Leal_ORs <- Leal_ORs[,c(1,12)]
-sub_Leal_IRs <- Leal_IRs[,c(1:2)]
+sub_OBPs <- OBPs[,c(1:3)]
+sub_ORs <- ORs[,c(1,12)]
+sub_IRs <- IRs[,c(1:2)]
+sub_GRs <- GRs[,c(1:2)]
+sub_CSPs <- CSPs[,c(1:2)]
+sub_PPKs <- PPKs[,c(1,6)]
 
+merged_Fritz_OBP_dataset <- merge(merged_Fritz_withCounts, sub_OBPs, by.x = "abbrev_VB_ID", by.y = "VectorBase_ID")
+merged_Fritz_OR_dataset <- merge(merged_Fritz_withCounts, sub_ORs, by.x = "abbrev_VB_ID", by.y = "abbrev_VB_ID")
+merged_Fritz_IR_dataset <- merge(merged_Fritz_withCounts, sub_IRs, by.x = "abbrev_VB_ID", by.y = "VectorBase_ID")
+merged_Fritz_GR_dataset <- merge(merged_Fritz_withCounts, sub_GRs, by.x = "abbrev_VB_ID", by.y = "accession")
+merged_Fritz_SNMP_dataset <- merge(merged_Fritz_withCounts, SNMPs, by.x = "abbrev_VB_ID", by.y = "accession")
+merged_Fritz_CSP_dataset <- merge(merged_Fritz_withCounts, sub_CSPs, by.x = "abbrev_VB_ID", by.y = "VectorBase.ID")
+merged_Fritz_PPK_dataset <- merge(merged_Fritz_withCounts, sub_PPKs, by.x = "abbrev_VB_ID", by.y = "accession")
 
-merged_Fritz_OBP_dataset <- merge(genes_detected, sub_Leal_OBPs, by.x = "ID", by.y = "VectorBase_ID")
-merged_Fritz_OR_dataset <- merge(genes_detected, sub_Leal_ORs, by.x = "ID", by.y = "abbrev_VB_ID")
-merged_Fritz_IR_dataset <- merge(genes_detected, sub_Leal_IRs, by.x = "ID", by.y = "VectorBase_ID")
 
 
 ```
@@ -64,42 +108,81 @@ merged_Fritz_IR_dataset <- merge(genes_detected, sub_Leal_IRs, by.x = "ID", by.y
 ```{r merging DEseq results with gene families, results = "hide"}
 
 #OBPs for each pair-wise comparison
-merged_sig_Fritz_OBP_dataset_CALGvCALP <- merge(merged_Fritz_OBP_dataset, Sig_CALG_CALP, by = "ID")
-merged_sig_Fritz_OBP_dataset_CALPvCALM <- merge(merged_Fritz_OBP_dataset, Sig_CALP_CALM, by = "ID")
-merged_sig_Fritz_OBP_dataset_CALPvPip <- merge(merged_Fritz_OBP_dataset, Sig_CALP_Pip, by = "ID")
+merged_sig_Fritz_OBP_dataset_CALGvCALP <- merge(merged_Fritz_OBP_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_OBP_dataset_CALPvPip <- merge(merged_Fritz_OBP_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed OBPs
-merged_sig_Fritz_OBP_dataset_CALGvCALP$ID #1
-merged_sig_Fritz_OBP_dataset_CALPvCALM$ID #18
-merged_sig_Fritz_OBP_dataset_CALPvPip$ID #19
+merged_sig_Fritz_OBP_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_OBP_dataset_CALGvCALP)
+merged_sig_Fritz_OBP_dataset_CALPvPip$abbrev_VB_ID
+nrow(merged_sig_Fritz_OBP_dataset_CALPvPip)
 
 #ORs for each pair-wise comparison
-merged_sig_Fritz_OR_dataset_CALGvCALP <- merge(merged_Fritz_OR_dataset, Sig_CALG_CALP, by = "ID")
-merged_sig_Fritz_OR_dataset_CALPvCALM <- merge(merged_Fritz_OR_dataset, Sig_CALP_CALM, by = "ID")
-merged_sig_Fritz_OR_dataset_CALPvPip <- merge(merged_Fritz_OR_dataset, Sig_CALP_Pip, by = "ID")
+merged_sig_Fritz_OR_dataset_CALGvCALP <- merge(merged_Fritz_OR_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_OR_dataset_CALPvPip <- merge(merged_Fritz_OR_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed ORs
-merged_sig_Fritz_OR_dataset_CALGvCALP$ID #0
-merged_sig_Fritz_OR_dataset_CALPvCALM$ID #6
-merged_sig_Fritz_OR_dataset_CALPvPip$ID #2
+merged_sig_Fritz_OR_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_OR_dataset_CALGvCALP)
+merged_sig_Fritz_OR_dataset_CALPvPip$abbrev_VB_ID 
+nrow(merged_sig_Fritz_OR_dataset_CALPvPip)
 
 #IRs for each pair-wise comparison
-merged_sig_Fritz_IR_dataset_CALGvCALP <- merge(merged_Fritz_IR_dataset, Sig_CALG_CALP, by = "ID")
-merged_sig_Fritz_IR_dataset_CALPvCALM <- merge(merged_Fritz_IR_dataset, Sig_CALP_CALM, by = "ID")
-merged_sig_Fritz_IR_dataset_CALPvPip <- merge(merged_Fritz_IR_dataset, Sig_CALP_Pip, by = "ID")
+merged_sig_Fritz_IR_dataset_CALGvCALP <- merge(merged_Fritz_IR_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_IR_dataset_CALPvPip <- merge(merged_Fritz_IR_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed IRs
-merged_sig_Fritz_IR_dataset_CALGvCALP$ID #0
-merged_sig_Fritz_IR_dataset_CALPvCALM$ID #6
-merged_sig_Fritz_IR_dataset_CALPvPip$ID #2
+merged_sig_Fritz_IR_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_IR_dataset_CALGvCALP)
+merged_sig_Fritz_IR_dataset_CALPvPip$abbrev_VB_ID
+nrow(merged_sig_Fritz_IR_dataset_CALPvPip)
+
+#GRs for each pair-wise comparison
+merged_sig_Fritz_GR_dataset_CALGvCALP <- merge(merged_Fritz_GR_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_GR_dataset_CALPvPip <- merge(merged_Fritz_GR_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
+
+#Printing Diff Expressed GRs
+merged_sig_Fritz_GR_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_GR_dataset_CALGvCALP)
+merged_sig_Fritz_GR_dataset_CALPvPip$abbrev_VB_ID
+nrow(merged_sig_Fritz_GR_dataset_CALPvPip)
+
+#SNMPs for each pair-wise comparison
+merged_sig_Fritz_SNMP_dataset_CALGvCALP <- merge(merged_Fritz_SNMP_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_SNMP_dataset_CALPvPip <- merge(merged_Fritz_SNMP_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
+
+#Printing Diff Expressed SNMPs
+merged_sig_Fritz_SNMP_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_SNMP_dataset_CALGvCALP)
+merged_sig_Fritz_SNMP_dataset_CALPvPip$abbrev_VB_ID
+nrow(merged_sig_Fritz_SNMP_dataset_CALPvPip)
 
 
+#CSPs for each pair-wise comparison
+merged_sig_Fritz_CSP_dataset_CALGvCALP <- merge(merged_Fritz_CSP_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_CSP_dataset_CALPvPip <- merge(merged_Fritz_CSP_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
+
+#Printing Diff Expressed CSPs
+merged_sig_Fritz_CSP_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_CSP_dataset_CALGvCALP)
+merged_sig_Fritz_CSP_dataset_CALPvPip$abbrev_VB_ID
+nrow(merged_sig_Fritz_CSP_dataset_CALPvPip)
+
+#PPKs for each pair-wise comparison
+merged_sig_Fritz_PPK_dataset_CALGvCALP <- merge(merged_Fritz_PPK_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_PPK_dataset_CALPvPip <- merge(merged_Fritz_PPK_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
+
+#Printing Diff Expressed PPKs
+merged_sig_Fritz_PPK_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_PPK_dataset_CALGvCALP)
+merged_sig_Fritz_PPK_dataset_CALPvPip$abbrev_VB_ID
+nrow(merged_sig_Fritz_PPK_dataset_CALPvPip)
 ```
 #####Now looking at general differences in expression, not accounting for multiple comparisons.  It is well known that p-value adjustments for multiple comparisons help reduce false positives, but lead to extraordinary underestimation of true positives (i.e. see Schurch et al. 2016).  Furthermore, we used whole heads for our RNA-seq analysis, so if a particular gene wasn't differentially expressed, it could be simply because it's mRNA was in such low copy number in our library relative to the total mRNA in the head.  I started by looking at OBPs, and I first wanted to understand how many were detected in my dataset.  
 
 ```{r Examining subsets of OBP data, results = "show"}
 
-merged_Fritz_OBP_dataset$sumCounts <- rowSums(merged_Fritz_OBP_dataset[,c(2:17)])
+merged_Fritz_OBP_dataset$sumCounts <- rowSums(merged_Fritz_OBP_dataset[,c(8:15)])
 
 #getting numbers of OBPs according to overall number of reads aligned
 NROW(subset(merged_Fritz_OBP_dataset, sumCounts>=1))
@@ -116,7 +199,7 @@ NROW(subset(merged_Fritz_OBP_dataset, sumCounts>=1000))
 
 ```{r subsetting OBP data for plotting, results = "hide"}
 
-sub_OBP_low <- subset(merged_Fritz_OBP_dataset, sumCounts < 100)
+sub_OBP_low <- subset(merged_Fritz_OBP_dataset, sumCounts >=10 & sumCounts < 100)
 
 sub_OBP_mod <- subset(merged_Fritz_OBP_dataset, sumCounts >=100 & sumCounts < 1000)
 
@@ -129,11 +212,11 @@ sub_OBP_hi <- subset(merged_Fritz_OBP_dataset, sumCounts >=1000)
 
 ```{r Reshaping full OBP data, results = "show"}
 #low
-sample_names <- names(sub_OBP_low[2:17])
+sample_names <- names(sub_OBP_low[8:15])
 sub_OBP_low_reshaped <- reshape(sub_OBP_low, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -144,17 +227,17 @@ sub_OBP_low_reshaped$Strain = substr(sub_OBP_low_reshaped$Strain,1,nchar(sub_OBP
 sub_OBP_low_reshaped$Rep = substr(sub_OBP_low_reshaped$Rep,nchar(sub_OBP_low_reshaped$Rep),nchar(sub_OBP_low_reshaped$Rep))
 
 #sanity check for reformatting
-sub_OBP_low_reshaped_CPIJ007931 <- subset(sub_OBP_low_reshaped, ID == "CPIJ007931")
-sum(sub_OBP_low_reshaped_CPIJ007931$Norm_Read_Count)
-sub_OBP_low_reshaped_CPIJ007931$sumCounts #good news
+sub_OBP_low_reshaped_CPIJ002108 <- subset(sub_OBP_low_reshaped, abbrev_VB_ID == "CPIJ002108")
+sum(sub_OBP_low_reshaped_CPIJ002108$Norm_Read_Count)
+sub_OBP_low_reshaped_CPIJ002108$sumCounts #good news
 
 
 #mod
-sample_names <- names(sub_OBP_mod[2:17])
+sample_names <- names(sub_OBP_mod[8:15])
 sub_OBP_mod_reshaped <- reshape(sub_OBP_mod, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -165,16 +248,16 @@ sub_OBP_mod_reshaped$Strain = substr(sub_OBP_mod_reshaped$Strain,1,nchar(sub_OBP
 sub_OBP_mod_reshaped$Rep = substr(sub_OBP_mod_reshaped$Rep,nchar(sub_OBP_mod_reshaped$Rep),nchar(sub_OBP_mod_reshaped$Rep))
 
 #sanity check - reformatting
-sub_OBP_mod_reshaped_CPIJ013976 <- subset(sub_OBP_mod_reshaped, ID == "CPIJ013976")
-sum(sub_OBP_mod_reshaped_CPIJ013976$Norm_Read_Count)
-sub_OBP_mod_reshaped_CPIJ013976$sumCounts #good news
+sub_OBP_mod_reshaped_CPIJ002109 <- subset(sub_OBP_mod_reshaped, abbrev_VB_ID == "CPIJ002109")
+sum(sub_OBP_mod_reshaped_CPIJ002109$Norm_Read_Count)
+sub_OBP_mod_reshaped_CPIJ002109$sumCounts #good news
 
 #hi
-sample_names <- names(sub_OBP_hi[2:17])
+sample_names <- names(sub_OBP_hi[8:15])
 sub_OBP_hi_reshaped <- reshape(sub_OBP_hi, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -191,24 +274,41 @@ sub_OBP_hi_reshaped$Rep = substr(sub_OBP_hi_reshaped$Rep,nchar(sub_OBP_hi_reshap
 
 ```{r Plots_OBP_Mean_expression, echo=TRUE , fig.height = 8, fig.width = 10, fig.align = "center"}
 
+
 #low
 lineplot.CI(CquiOBP, Norm_Read_Count, group = Strain, data = sub_OBP_low_reshaped, type = "p", cex = 1.5,
             xlab = "OBP", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim =
-            c(0,20), cex.lab = 1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            c(0,40), cex.lab = 1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
 
 #med
 lineplot.CI(CquiOBP, Norm_Read_Count, group = Strain, data = sub_OBP_mod_reshaped, type = "p", cex = 1.5,
-            xlab = "OBP",   ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,200), 
-            cex.lab =1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            xlab = "OBP",   ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,300), 
+            cex.lab =1.5, col = c( "red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
 
 
 #high
 lineplot.CI(CquiOBP, Norm_Read_Count, group = Strain, data = sub_OBP_hi_reshaped, type = "p", cex = 1.5,
             xlab = "OBP", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,6200), 
-            cex.lab =1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            cex.lab =1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+
+tot_log_OBPs <- rbind(sub_OBP_low_reshaped, sub_OBP_mod_reshaped, sub_OBP_hi_reshaped)
+tot_log_OBPs$log_Norm_Read_Count <- log10(tot_log_OBPs$Norm_Read_Count+1)
+tot_log_OBPs$sample <- paste(tot_log_OBPs$Strain, sep = "_", tot_log_OBPs$Rep)
+ord_tot_log_OBPs <- tot_log_OBPs[order(tot_log_OBPs$abbrev_VB_ID, tot_log_OBPs$sample),]
+
+#On log scale
+par(mar= c(5,5,4,1))
+lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = Strain, data = ord_tot_log_OBPs, type = "p", cex = 1.7,
+            xlab = "OBP", ylab = "Log10 Mean Norm Read Count (+/- 95% CIs)", 
+            ylim = c(0,5), xlim = c(0,length(unique(tot_log_OBPs$abbrev_VB_ID))),
+            cex.lab =1.8, cex.axis = 1.5, cex.leg = 1.2, 
+            col = c("red", "darkblue"), 
+            pch = c(16,16), xaxt = "n", ci.fun= boot.fn)
+
+print(merged_Fritz_OBP_dataset)
             
 ```
 
@@ -216,7 +316,7 @@ lineplot.CI(CquiOBP, Norm_Read_Count, group = Strain, data = sub_OBP_hi_reshaped
 
 ```{r Examining subsets of OR data, results = "show"}
 
-merged_Fritz_OR_dataset$sumCounts <- rowSums(merged_Fritz_OR_dataset[,c(2:17)])
+merged_Fritz_OR_dataset$sumCounts <- rowSums(merged_Fritz_OR_dataset[,c(8:15)])
 
 #getting numbers of ORs according to overall number of reads aligned
 NROW(subset(merged_Fritz_OR_dataset, sumCounts>=1))
@@ -245,11 +345,11 @@ sub_OR_hi <- subset(merged_Fritz_OR_dataset, sumCounts >=1000)
 
 ```{r Reshaping full OR data, results = "show"}
 #low
-sample_names <- names(sub_OR_low[2:17])
+sample_names <- names(sub_OR_low[8:15])
 sub_OR_low_reshaped <- reshape(sub_OR_low, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -260,17 +360,17 @@ sub_OR_low_reshaped$Strain = substr(sub_OR_low_reshaped$Strain,1,nchar(sub_OR_lo
 sub_OR_low_reshaped$Rep = substr(sub_OR_low_reshaped$Rep,nchar(sub_OR_low_reshaped$Rep),nchar(sub_OR_low_reshaped$Rep))
 
 #sanity check for reformatting
-sub_OR_low_reshaped_CPIJ000545 <- subset(sub_OR_low_reshaped, ID == "CPIJ000545")
-sum(sub_OR_low_reshaped_CPIJ000545$Norm_Read_Count)
-sub_OR_low_reshaped_CPIJ000545$sumCounts #good news
+sub_OR_low_reshaped_CPIJ002479 <- subset(sub_OR_low_reshaped, abbrev_VB_ID == "CPIJ002479")
+sum(sub_OR_low_reshaped_CPIJ002479$Norm_Read_Count)
+sub_OR_low_reshaped_CPIJ002479$sumCounts #good news
 
 
 #mod
-sample_names <- names(sub_OR_mod[2:17])
+sample_names <- names(sub_OR_mod[8:15])
 sub_OR_mod_reshaped <- reshape(sub_OR_mod, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -280,17 +380,13 @@ sub_OR_mod_reshaped$Rep <- sub_OR_mod_reshaped$Strain
 sub_OR_mod_reshaped$Strain = substr(sub_OR_mod_reshaped$Strain,1,nchar(sub_OR_mod_reshaped$Strain)-1)
 sub_OR_mod_reshaped$Rep = substr(sub_OR_mod_reshaped$Rep,nchar(sub_OR_mod_reshaped$Rep),nchar(sub_OR_mod_reshaped$Rep))
 
-#sanity check - reformatting
-sub_OR_mod_reshaped_CPIJ013944 <- subset(sub_OR_mod_reshaped, ID == "CPIJ013944")
-sum(sub_OR_mod_reshaped_CPIJ013944$Norm_Read_Count)
-sub_OR_mod_reshaped_CPIJ013944$sumCounts #good news
 
 #hi
-sample_names <- names(sub_OR_hi[2:17])
+sample_names <- names(sub_OR_hi[8:15])
 sub_OR_hi_reshaped <- reshape(sub_OR_hi, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -310,29 +406,44 @@ sub_OR_hi_reshaped$Rep = substr(sub_OR_hi_reshaped$Rep,nchar(sub_OR_hi_reshaped$
 #low
 lineplot.CI(CquiOR, Norm_Read_Count, group = Strain, data = sub_OR_low_reshaped, type = "p", cex = 1.5,
             xlab = "OR", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim =
-            c(0,30), cex.lab = 1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            c(0,30), cex.lab = 1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
 
 #med
 lineplot.CI(CquiOR, Norm_Read_Count, group = Strain, data = sub_OR_mod_reshaped, type = "p", cex = 1.5,
-            xlab = "OR",   ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,80), 
-            cex.lab =1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            xlab = "OR",   ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,150), 
+            cex.lab =1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
 
 
 #high
 lineplot.CI(CquiOR, Norm_Read_Count, group = Strain, data = sub_OR_hi_reshaped, type = "p", cex = 1.5,
             xlab = "OR", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,1000), 
-            cex.lab =1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            cex.lab =1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+
+tot_log_ORs <- rbind(sub_OR_low_reshaped, sub_OR_mod_reshaped, sub_OR_hi_reshaped)
+tot_log_ORs$log_Norm_Read_Count <- log(tot_log_ORs$Norm_Read_Count+1)
+tot_log_ORs$sample <- paste(tot_log_ORs$Strain, sep = "_", tot_log_ORs$Rep)
+ord_tot_log_ORs <- tot_log_ORs[order(tot_log_ORs$abbrev_VB_ID, tot_log_ORs$sample),]
+
+#All on log scale
+par(mar= c(5,5,4,1))
+lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_ORs,             type = "p", cex = 1.5, xlab = "OR", 
+            ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
+            ylim = c(0,10), cex.lab =1.5, col = c("red", "darkblue"), 
+            pch = c(16,16), xaxt='n', err.width = 0, ci.fun= boot.fn)
+
+print(merged_Fritz_OR_dataset)
+            
             
 ```
 
-#####Lastly, examining IRs. Checking how many recovered in my dataset. 
+#####Examining IRs. Checking how many recovered in my dataset. 
 
 ```{r Examining subsets of IR data, results = "show"}
 
-merged_Fritz_IR_dataset$sumCounts <- rowSums(merged_Fritz_IR_dataset[,c(2:17)])
+merged_Fritz_IR_dataset$sumCounts <- rowSums(merged_Fritz_IR_dataset[,c(8:15)])
 
 #getting numbers of ORs according to overall number of reads aligned
 NROW(subset(merged_Fritz_IR_dataset, sumCounts>=1))
@@ -360,11 +471,11 @@ sub_IR_hi <- subset(merged_Fritz_IR_dataset, sumCounts >=1000)
 
 ```{r Reshaping full IR data, results = "show"}
 #low
-sample_names <- names(sub_IR_low[2:17])
+sample_names <- names(sub_IR_low[8:15])
 sub_IR_low_reshaped <- reshape(sub_IR_low, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -376,11 +487,11 @@ sub_IR_low_reshaped$Rep = substr(sub_IR_low_reshaped$Rep,nchar(sub_IR_low_reshap
 
 
 #mod
-sample_names <- names(sub_IR_mod[2:17])
+sample_names <- names(sub_IR_mod[8:15])
 sub_IR_mod_reshaped <- reshape(sub_IR_mod, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -391,11 +502,11 @@ sub_IR_mod_reshaped$Strain = substr(sub_IR_mod_reshaped$Strain,1,nchar(sub_IR_mo
 sub_IR_mod_reshaped$Rep = substr(sub_IR_mod_reshaped$Rep,nchar(sub_IR_mod_reshaped$Rep),nchar(sub_IR_mod_reshaped$Rep))
 
 #hi
-sample_names <- names(sub_IR_hi[2:17])
+sample_names <- names(sub_IR_hi[8:15])
 sub_IR_hi_reshaped <- reshape(sub_IR_hi, 
-                         varying = list(2:17),
+                         varying = list(8:15),
                          direction="long",
-                         idvar= "ID",
+                         idvar= "abbrev_VB_ID",
                          times=sample_names,
                          v.names="Norm_Read_Count",
                          new.row.names=NULL)
@@ -414,21 +525,207 @@ sub_IR_hi_reshaped$Rep = substr(sub_IR_hi_reshaped$Rep,nchar(sub_IR_hi_reshaped$
 
 #low
 lineplot.CI(CquiIR, Norm_Read_Count, group = Strain, data = sub_IR_low_reshaped, type = "p", cex = 1.5,
-            xlab = "IR", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim =
-            c(0,30), cex.lab = 1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            xlab = "IR", ylab = "Mean Normalized Read Count (+/- 95% CIs)",
+            ylim =c(0,30), cex.lab = 1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
 
 #med
 lineplot.CI(CquiIR, Norm_Read_Count, group = Strain, data = sub_IR_mod_reshaped, type = "p", cex = 1.5,
-            xlab = "IR",   ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,100), 
-            cex.lab =1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            xlab = "IR",   ylab = "Mean Normalized Read Count (+/- 95% CIs)",
+            ylim = c(0,100), cex.lab =1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
 
 
 #high
 lineplot.CI(CquiIR, Norm_Read_Count, group = Strain, data = sub_IR_hi_reshaped, type = "p", cex = 1.5,
             xlab = "IR", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,300), 
-            cex.lab =1.5, col = c("blue", "red", "black", "grey"), 
-            pch = c(16,16,16,16), xaxt='n', ci.fun= boot.fn)
+            cex.lab =1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+
+tot_log_IRs <- rbind(sub_IR_low_reshaped, sub_IR_mod_reshaped, sub_IR_hi_reshaped)
+tot_log_IRs$log_Norm_Read_Count <- log(tot_log_IRs$Norm_Read_Count+1)
+tot_log_IRs$sample <- paste(tot_log_IRs$Strain, sep = "_", tot_log_IRs$Rep)
+ord_tot_log_IRs <- tot_log_IRs[order(tot_log_IRs$abbrev_VB_ID, tot_log_IRs$sample),]
+
+
+#All on log scale
+par(mar= c(5,5,4,1))
+lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_IRs, type = "p", cex = 1.5, xlab = "IR", ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10), ylim = c(0,10), cex.lab =1.5, col = c("red", "darkblue"), err.width = 0, pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+
+print(merged_Fritz_IR_dataset)
             
 ```
+
+###Lastly, GR results.
+
+```{r Examining subsets of GR data, results = "show"}
+
+merged_Fritz_GR_dataset$sumCounts <- rowSums(merged_Fritz_GR_dataset[,c(8:15)])
+
+#getting numbers of GRs according to overall number of reads aligned
+NROW(subset(merged_Fritz_GR_dataset, sumCounts>=1))
+
+NROW(subset(merged_Fritz_GR_dataset, sumCounts>=10))
+
+NROW(subset(merged_Fritz_GR_dataset, sumCounts>=100))
+
+NROW(subset(merged_Fritz_GR_dataset, sumCounts>=1000))
+
+```
+
+#####I pulled out lowly expressed, moderately expressed, and highly expressed genes and placed them in different dataframes for plotting expression level by mosquito strain.
+
+```{r subsetting GR data for plotting, results = "hide"}
+
+sub_GR_low <- subset(merged_Fritz_GR_dataset, sumCounts < 100)
+
+sub_GR_mod <- subset(merged_Fritz_GR_dataset, sumCounts >=100 & sumCounts < 1000)
+
+sub_GR_hi <- subset(merged_Fritz_GR_dataset, sumCounts >=1000)
+
+```
+
+
+#####I reshaped each dataframe from wide to long format, which was more conducive to plotting.
+
+```{r Reshaping full GR data, results = "show"}
+#low
+sample_names <- names(sub_GR_low[8:15])
+sub_GR_low_reshaped <- reshape(sub_GR_low, 
+                         varying = list(8:15),
+                         direction="long",
+                         idvar= "abbrev_VB_ID",
+                         times=sample_names,
+                         v.names="Norm_Read_Count",
+                         new.row.names=NULL)
+
+names(sub_GR_low_reshaped)[names(sub_GR_low_reshaped) == 'time'] <- 'Strain'
+sub_GR_low_reshaped$Rep <- sub_GR_low_reshaped$Strain
+sub_GR_low_reshaped$Strain = substr(sub_GR_low_reshaped$Strain,1,nchar(sub_GR_low_reshaped$Strain)-1)
+sub_GR_low_reshaped$Rep = substr(sub_GR_low_reshaped$Rep,nchar(sub_GR_low_reshaped$Rep),nchar(sub_GR_low_reshaped$Rep))
+
+#sanity check for reformatting
+sub_GR_low_reshaped_CPIJ007931 <- subset(sub_GR_low_reshaped, ID == "CPIJ007931")
+sum(sub_GR_low_reshaped_CPIJ007931$Norm_Read_Count)
+sub_GR_low_reshaped_CPIJ007931$sumCounts #good news
+
+
+#mod
+sample_names <- names(sub_GR_mod[8:15])
+sub_GR_mod_reshaped <- reshape(sub_GR_mod, 
+                         varying = list(8:15),
+                         direction="long",
+                         idvar= "abbrev_VB_ID",
+                         times=sample_names,
+                         v.names="Norm_Read_Count",
+                         new.row.names=NULL)
+
+names(sub_GR_mod_reshaped)[names(sub_GR_mod_reshaped) == 'time'] <- 'Strain'
+sub_GR_mod_reshaped$Rep <- sub_GR_mod_reshaped$Strain
+sub_GR_mod_reshaped$Strain = substr(sub_GR_mod_reshaped$Strain,1,nchar(sub_GR_mod_reshaped$Strain)-1)
+sub_GR_mod_reshaped$Rep = substr(sub_GR_mod_reshaped$Rep,nchar(sub_GR_mod_reshaped$Rep),nchar(sub_GR_mod_reshaped$Rep))
+
+#hi
+sample_names <- names(sub_GR_hi[8:15])
+sub_GR_hi_reshaped <- reshape(sub_GR_hi, 
+                         varying = list(8:15),
+                         direction="long",
+                         idvar= "abbrev_VB_ID",
+                         times=sample_names,
+                         v.names="Norm_Read_Count",
+                         new.row.names=NULL)
+
+names(sub_GR_hi_reshaped)[names(sub_GR_hi_reshaped) == 'time'] <- 'Strain'
+sub_GR_hi_reshaped$Rep <- sub_GR_hi_reshaped$Strain
+sub_GR_hi_reshaped$Strain = substr(sub_GR_hi_reshaped$Strain,1,nchar(sub_GR_hi_reshaped$Strain)-1)
+sub_GR_hi_reshaped$Rep = substr(sub_GR_hi_reshaped$Rep,nchar(sub_GR_hi_reshaped$Rep),nchar(sub_GR_hi_reshaped$Rep))
+
+```
+
+####GR Results
+#####Finally, I used sciplot to view interactions between GR expression and mosquito treatment group. 
+
+```{r Plots_GR_Mean_expression, echo=TRUE , fig.height = 8, fig.width = 10, fig.align = "center"}
+
+
+#low
+lineplot.CI(abbrev_VB_ID, Norm_Read_Count, group = Strain, data = sub_GR_low_reshaped, type = "p", cex = 1.5,
+            xlab = "GR", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim =
+            c(0,20), cex.lab = 1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+
+#med
+lineplot.CI(abbrev_VB_ID, Norm_Read_Count, group = Strain, data = sub_GR_mod_reshaped, type = "p", cex = 1.5,
+            xlab = "GR",   ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,200), 
+            cex.lab =1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+
+
+#high
+lineplot.CI(abbrev_VB_ID, Norm_Read_Count, group = Strain, data = sub_GR_hi_reshaped, type = "p", cex = 1.5,
+            xlab = "GR", ylab = "Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,6200), 
+            cex.lab =1.5, col = c("red", "black"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+
+tot_log_GRs <- rbind(sub_GR_mod_reshaped, sub_GR_hi_reshaped)
+tot_log_GRs$log_Norm_Read_Count <- log(tot_log_GRs$Norm_Read_Count)
+tot_log_GRs$fake_num <- c(1:nrow(tot_log_GRs))
+
+#All on log scale
+lineplot.CI(abbrev_VB_ID, log_Norm_Read_Count, group = Strain, data = tot_log_GRs, type = "p", cex = 1.5,
+            xlab = "GR", ylab = "Log of Mean Normalized Read Count (+/- 95% CIs)", ylim = c(0,15), 
+            cex.lab =1.5, col = c("red", "darkblue"), 
+            pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+            
+
+print(merged_Fritz_GR_dataset)
+```
+
+```{r Examining subsets of SNMP data, results = "show"}
+
+merged_Fritz_SNMP_dataset$sumCounts <- rowSums(merged_Fritz_SNMP_dataset[,c(8:15)])
+
+#getting numbers of SNMPs according to overall number of reads aligned
+NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=1))
+
+NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=10))
+
+NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=100))
+
+NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=1000))
+
+print(merged_Fritz_SNMP_dataset)
+
+```
+
+```{r Examining subsets of CSP data, results = "show"}
+
+merged_Fritz_CSP_dataset$sumCounts <- rowSums(merged_Fritz_CSP_dataset[,c(8:15)])
+
+#getting numbers of CSPs according to overall number of reads aligned
+NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=1))
+
+NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=10))
+
+NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=100))
+
+NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=1000))
+
+print(merged_Fritz_CSP_dataset)
+
+```
+
+```{r Examining subsets of PPK data, results = "show"}
+
+merged_Fritz_PPK_dataset$sumCounts <- rowSums(merged_Fritz_PPK_dataset[,c(8:15)])
+
+#getting numbers of PPKs according to overall number of reads aligned
+NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=1))
+
+NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=10))
+
+NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=100))
+
+NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=1000))
+
+print(merged_Fritz_PPK_dataset)
