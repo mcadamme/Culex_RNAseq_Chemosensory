@@ -9,7 +9,7 @@
 #BiocManager::install('EnhancedVolcano')
 
 #Load Libraries
-library(DESeq2); library(pheatmap); library(ashr); library(EnhancedVolcano); library(magrittr); library(ggfortify); library(reshape2); library(ggplot2); library(GOplot); library(lmtest)
+library(DESeq2); library(pheatmap); library(ashr); library(EnhancedVolcano); library(magrittr); library(ggfortify); library(reshape2); library(ggplot2); library(GOplot); library(arm)
 
 #set working directory - tried multiple quality scores and aligning by gene and exon (no real difference in output)
 #so sticking with hiQual_ex
@@ -71,13 +71,41 @@ boxplot(logcounts,
 abline(h=median(as.matrix(logcounts)), col="blue")
 
 
+
 #Looking at PCA of the data - Do treatments cluster together?
 rlogcounts <- rlog(counts(ddsHTSeq))#transforming data to make it approximately homoskedastic, n < 30 so rlog is better
 
-#run PCA
-pcDat <- prcomp(t(rlogcounts))
+select = order(rowMeans(rlogcounts), decreasing=TRUE)[1:12710]
+#This select variable is here because I modified the numbers of genes included in the PCA - from 500-12710.
+#The percent variation explained by each PC changes with the number of genes included, but not THAT much.
+#At lower numbers of genes, PhysStat can be predicted by PC1 better than PC2, but this changes as I increase to include more.
+#Because I couldn't decide on a sensible cutoff for the number of genes to include, I used the full dataset.
 
-#test for significance of PC1 and PC2
+
+highexprgenes_counts <- rlogcounts[select,]
+
+colnames(highexprgenes_counts)<- ddsHTSeq$condition
+
+data_for_PCA <- t(highexprgenes_counts)
+dim(data_for_PCA)
+
+#run PCA
+pcDat <- prcomp(data_for_PCA, center = T)
+
+#basic plot
+autoplot(pcDat)
+
+#plot for pub
+pdf("Fig2_PCA_Treatments.pdf",width=6,height=6,paper='special')
+autoplot(pcDat,
+         data = ddsHTSeq$colData, 
+         colour=as.numeric(factor(ddsHTSeq$condition)),
+         shape=FALSE, 
+         label.size=6, xlim = c(-0.4, 0.5)) + theme_bw()
+dev.off()
+
+
+#test of whether PCs can predict strain and physState
 Treats <- as.character(c("BG_grav", "BG_grav", "BG_grav", "BG_grav", "BG_par", "BG_par", "BG_par", "BG_par", "AG2", "AG2", "AG2", "AG2"))
 PC1 <- as.character(pcDat$x[,1])
 PC2 <- as.character(pcDat$x[,2])
@@ -93,57 +121,66 @@ dat_for_glm$PC1 <- as.numeric(as.character(dat_for_glm$PC1))
 dat_for_glm$PC2 <- as.numeric(as.character(dat_for_glm$PC2))
 dat_for_glm$PC3 <- as.numeric(as.character(dat_for_glm$PC3))
 
-#model for PC1 & strain
-model1_F <- glm(dat_for_glm$Strain ~ 1 + dat_for_glm$PC1, family = binomial)
-model1_R <- glm(dat_for_glm$Strain ~ 1, family = binomial)
-lrtest(model1_R, model1_F)
 
-#model for PC2 & phys state
-model2_F <- glm(dat_for_glm$PhysStat ~ 1 + dat_for_glm$PC2, family = binomial, maxit = 100)
-summary(model2_F)
-model2_R <- glm(dat_for_glm$PhysStat ~ 1, family = binomial)
-summary(model2_R)
-lrtest(model2_R, model2_F)#but there is a warning issue.....
+#Are PCs 1,2,3 capable of separating samples by strain?
+Model_strain_PC1 <- bayesglm(Strain ~ PC1, data=dat_for_glm, family="binomial")
+summary(Model_strain_PC1)
 
-#checking to see how bad the model coefs are - pretty off
-fit <- bayesglm(PhysStat ~ PC2, data=dat_for_glm, family="binomial")
-display(fit)
+simulates <- coef(sim(Model_strain_PC1, n.sims = 10000))
+head(simulates, 10)
+plot(density(simulates[,2]), main = "Model_strain_PC1", xlab = "Posterior.open", ylab = "Density")
 
-#does it impact the model's logLik, which is used by lrtest
-#switching 1 obs from hs to grav, which should resolve the glm.fit warning.
-PhysStat_mod <- as.character(c("grav", "grav", "grav", "grav", "grav", "hs", "hs", "hs", "hs", "hs", "hs", "hs"))
+quantile(simulates[,2], c(0.025, 0.975))#gives the 95% credible intervals, which don't overlap with zero
+#This indicates that PC1 is capable of separating our samples by strain.
 
-dat_for_glm <- data.frame(cbind(dat_for_glm, PhysStat_mod))
+Model_strain_PC2 <- bayesglm(Strain ~ PC2, data=dat_for_glm, family="binomial")
+summary(Model_strain_PC2)
 
-#fake model
-modelFake_F <- glm(dat_for_glm$PhysStat_mod ~ 1 + dat_for_glm$PC2, family = binomial, maxit = 100) #no warning
-summary(modelFake_F)
+simulates <- coef(sim(Model_strain_PC2, n.sims = 10000))
+head(simulates, 10)
+plot(density(simulates[,2]), main = "Model_strain_PC2", xlab = "Posterior.open", ylab = "Density")
 
-logLik(modelFake_F)
-logLik(model2_F)
+quantile(simulates[,2], c(0.025, 0.975))#PC2 - overlaps zero
+
+Model_strain_PC3 <- bayesglm(Strain ~ PC3, data=dat_for_glm, family="binomial")
+summary(Model_strain_PC3)
+
+simulates <- coef(sim(Model_strain_PC3, n.sims = 10000))
+head(simulates, 10)
+plot(density(simulates[,2]), main = "Model_strain_PC3", xlab = "Posterior.open", ylab = "Density")
+
+quantile(simulates[,2], c(0.025, 0.975))#PC3 - overlaps zero
 
 
-#basic plot
-autoplot(pcDat)#checking patterns are same as for plot below because of weird warning for plot below.
+#Are PCs 1,2,3 capable of separating samples by physState?
+Model_PhysStat_PC1 <- bayesglm(PhysStat ~ PC1, data=dat_for_glm, family="binomial")
+summary(Model_PhysStat_PC1)
 
-#plot for pub
-pdf("Fig2_PCA_Treatments.pdf",width=6,height=6,paper='special')
-autoplot(pcDat,
-         data = ddsHTSeq$colData, 
-         colour=as.numeric(factor(ddsHTSeq$condition)),
-          shape=FALSE,
-         label.size=6, xlim = c(-0.4, 0.5)) + theme_bw()
-dev.off()
+simulates <- coef(sim(Model_PhysStat_PC1, n.sims = 10000))
+head(simulates, 10)
+plot(density(simulates[,2]), main = "Model_PhysStat_PC1", xlab = "Posterior.open", ylab = "Density")
 
-#checking PC3 - only explains 7% variation and doesn't really do anything for clustering.
-pdf("PCs1And3_Treatments.pdf",width=6,height=6,paper='special')
-autoplot(pcDat, x = 1,  
-         y = 3,
-         data = ddsHTSeq$colData, 
-         colour=as.numeric(factor(ddsHTSeq$condition)),
-         shape=FALSE,
-         label.size=6, xlim = c(-0.4, 0.5)) + theme_bw()
-dev.off()
+quantile(simulates[,2], c(0.025, 0.975))#PC1 & PhysStat - overlaps zero.
+
+Model_PhysStat_PC2 <- bayesglm(PhysStat ~ PC2, data=dat_for_glm, family="binomial")
+summary(Model_PhysStat_PC2)
+
+simulates <- coef(sim(Model_PhysStat_PC2, n.sims = 10000))
+head(simulates, 10)
+plot(density(simulates[,2]), main = "Model_PhysStat_PC2", xlab = "Posterior.open", ylab = "Density")
+
+quantile(simulates[,2], c(0.025, 0.975))#PC2 & PhysStat - does not overlap zero
+
+Model_PhysStat_PC3 <- bayesglm(PhysStat ~ PC3, data=dat_for_glm, family="binomial")
+summary(Model_PhysStat_PC3)
+
+simulates <- coef(sim(Model_PhysStat_PC3, n.sims = 10000))
+head(simulates, 10)
+plot(density(simulates[,2]), main = "Model_PhysStat_PC3", xlab = "Posterior.open", ylab = "Density")
+
+quantile(simulates[,2], c(0.025, 0.975))#PC3 & PhysStat - overlaps zero
+
+
 
 #Note that the PCA shows that BG_Parous4 is fairly different from the other BG parous treatments - should I drop it?  See end of script for code to do this - in the end, I did not for the paper.
 
@@ -427,7 +464,7 @@ print(VennDiag$plot)
 
 
 
-###Heat map of select genes
+###Heat map of sensory genes
 
 #Transform the count data for plotting and turn it into a matrix
 rld <- rlog(dds, blind=FALSE)
@@ -444,6 +481,7 @@ select_genes<-mat[idx, inx2]
 pdf("heatmap.pdf",width=6,height=4,paper='special')
 pheatmap(select_genes,cluster_rows =F)
 dev.off()
+
 
 ######After looking at the first PCA, I wasn't sure about whether to drop BG_parous4.  In the end, I did not because it did not greatly impact the numbers of differentially expressed genes I recovered.
 #Load in read counts and assign them sample labels
