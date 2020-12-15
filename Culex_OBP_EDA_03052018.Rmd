@@ -35,6 +35,7 @@ library(sciplot)
 #use this to specify the file paths
 genes_detected <- read.table("~/Desktop/CulexRNAseq/data/CALparousF_v_PipEvanF_AllGenes_LFCS.txt", header = F)#using LCFS for the parous v pip contrast
 genes_detected$abbrev_VB_ID <- gsub("-RA", "", genes_detected$V1) #removing mods to VB ID
+genes_detected <- genes_detected[,c(1,4)]#removing irrelevant columns
 
 gff3 <- read.table("~/Desktop/CulexRNAseq/data/Culex-quinquefasciatus-Johannesburg_BASEFEATURES_CpipJ2.4.gff3", sep="\t", stringsAsFactors=F)
 
@@ -182,10 +183,9 @@ nrow(merged_sig_Fritz_PPK_dataset_CALPvPip)
 
 ```{r Examining subsets of OBP data, results = "show"}
 
-merged_Fritz_OBP_dataset$sumCounts <- rowSums(merged_Fritz_OBP_dataset[,c(8:15)])
+merged_Fritz_OBP_dataset$sumCounts <- rowSums(merged_Fritz_OBP_dataset[,c(6:13)])
 
 #getting numbers of OBPs according to overall number of reads aligned
-NROW(subset(merged_Fritz_OBP_dataset, sumCounts>=1))
 
 NROW(subset(merged_Fritz_OBP_dataset, sumCounts>=10))
 
@@ -212,9 +212,9 @@ sub_OBP_hi <- subset(merged_Fritz_OBP_dataset, sumCounts >=1000)
 
 ```{r Reshaping full OBP data, results = "show"}
 #low
-sample_names <- names(sub_OBP_low[8:15])
+sample_names <- names(sub_OBP_low[6:13])
 sub_OBP_low_reshaped <- reshape(sub_OBP_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -233,9 +233,9 @@ sub_OBP_low_reshaped_CPIJ002108$sumCounts #good news
 
 
 #mod
-sample_names <- names(sub_OBP_mod[8:15])
+sample_names <- names(sub_OBP_mod[6:13])
 sub_OBP_mod_reshaped <- reshape(sub_OBP_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -253,9 +253,9 @@ sum(sub_OBP_mod_reshaped_CPIJ002109$Norm_Read_Count)
 sub_OBP_mod_reshaped_CPIJ002109$sumCounts #good news
 
 #hi
-sample_names <- names(sub_OBP_hi[8:15])
+sample_names <- names(sub_OBP_hi[6:13])
 sub_OBP_hi_reshaped <- reshape(sub_OBP_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -300,13 +300,18 @@ tot_log_OBPs$sample <- paste(tot_log_OBPs$Strain, sep = "_", tot_log_OBPs$Rep)
 ord_tot_log_OBPs <- tot_log_OBPs[order(tot_log_OBPs$abbrev_VB_ID, tot_log_OBPs$sample),]
 
 #On log scale
-par(mar= c(5,5,4,1))
-lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = Strain, data = ord_tot_log_OBPs, type = "p", cex = 1.7,
-            xlab = "OBP", ylab = "Log10 Mean Norm Read Count (+/- 95% CIs)", 
+par(mar= c(6.5,5,4,1))
+lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = Strain, data = ord_tot_log_OBPs, type = "p", cex = 1.7, legend = F,
+            xlab = "", ylab = "Log10 Mean Norm Read Count (+/- 95% CIs)", 
             ylim = c(0,5), xlim = c(0,length(unique(tot_log_OBPs$abbrev_VB_ID))),
             cex.lab =1.8, cex.axis = 1.5, cex.leg = 1.2, 
             col = c("red", "darkblue"), 
             pch = c(16,16), xaxt = "n", ci.fun= boot.fn)
+labels <- unique(ord_tot_log_OBPs$CquiOBP)
+labels2 <- gsub('\\*|#','', labels)
+axis(side = 1, at = seq(c(1:42)), labels=labels2, las = 2, cex =1.3)
+legend(35, 5, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
+            pch = c(16,16), cex = 1.5)
 
 print(merged_Fritz_OBP_dataset)
             
@@ -316,10 +321,9 @@ print(merged_Fritz_OBP_dataset)
 
 ```{r Examining subsets of OR data, results = "show"}
 
-merged_Fritz_OR_dataset$sumCounts <- rowSums(merged_Fritz_OR_dataset[,c(8:15)])
+merged_Fritz_OR_dataset$sumCounts <- rowSums(merged_Fritz_OR_dataset[,c(6:13)])
 
 #getting numbers of ORs according to overall number of reads aligned
-NROW(subset(merged_Fritz_OR_dataset, sumCounts>=1))
 
 NROW(subset(merged_Fritz_OR_dataset, sumCounts>=10))
 
@@ -345,9 +349,9 @@ sub_OR_hi <- subset(merged_Fritz_OR_dataset, sumCounts >=1000)
 
 ```{r Reshaping full OR data, results = "show"}
 #low
-sample_names <- names(sub_OR_low[8:15])
+sample_names <- names(sub_OR_low[6:13])
 sub_OR_low_reshaped <- reshape(sub_OR_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -366,9 +370,9 @@ sub_OR_low_reshaped_CPIJ002479$sumCounts #good news
 
 
 #mod
-sample_names <- names(sub_OR_mod[8:15])
+sample_names <- names(sub_OR_mod[6:13])
 sub_OR_mod_reshaped <- reshape(sub_OR_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -382,9 +386,9 @@ sub_OR_mod_reshaped$Rep = substr(sub_OR_mod_reshaped$Rep,nchar(sub_OR_mod_reshap
 
 
 #hi
-sample_names <- names(sub_OR_hi[8:15])
+sample_names <- names(sub_OR_hi[6:13])
 sub_OR_hi_reshaped <- reshape(sub_OR_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -428,14 +432,21 @@ tot_log_ORs$sample <- paste(tot_log_ORs$Strain, sep = "_", tot_log_ORs$Rep)
 ord_tot_log_ORs <- tot_log_ORs[order(tot_log_ORs$abbrev_VB_ID, tot_log_ORs$sample),]
 
 #All on log scale
-par(mar= c(5,5,4,1))
-lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_ORs,             type = "p", cex = 1.5, xlab = "OR", 
+par(mar= c(6.5,5,4,1))
+lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_ORs,             type = "p", cex = 2, xlab = "", legend = F,
             ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
-            ylim = c(0,10), cex.lab =1.5, col = c("red", "darkblue"), 
+            ylim = c(0,8), cex.lab =1.8, cex.axis = 1.5, col = c("red", "darkblue"), 
             pch = c(16,16), xaxt='n', err.width = 0, ci.fun= boot.fn)
+labels <- unique(ord_tot_log_ORs$CquiOR)
+labels2 <- gsub('\\*|#','', labels)
+axis(side = 1, at = seq(c(1:10)), labels=labels2, las = 2, cex.axis =1.5)
+legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
+            pch = c(16,16), cex = 1.5)
 
 print(merged_Fritz_OR_dataset)
-            
+  
+
+     
             
 ```
 
@@ -443,10 +454,9 @@ print(merged_Fritz_OR_dataset)
 
 ```{r Examining subsets of IR data, results = "show"}
 
-merged_Fritz_IR_dataset$sumCounts <- rowSums(merged_Fritz_IR_dataset[,c(8:15)])
+merged_Fritz_IR_dataset$sumCounts <- rowSums(merged_Fritz_IR_dataset[,c(6:13)])
 
 #getting numbers of ORs according to overall number of reads aligned
-NROW(subset(merged_Fritz_IR_dataset, sumCounts>=1))
 
 NROW(subset(merged_Fritz_IR_dataset, sumCounts>=10))
 
@@ -471,9 +481,9 @@ sub_IR_hi <- subset(merged_Fritz_IR_dataset, sumCounts >=1000)
 
 ```{r Reshaping full IR data, results = "show"}
 #low
-sample_names <- names(sub_IR_low[8:15])
+sample_names <- names(sub_IR_low[6:13])
 sub_IR_low_reshaped <- reshape(sub_IR_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -487,9 +497,9 @@ sub_IR_low_reshaped$Rep = substr(sub_IR_low_reshaped$Rep,nchar(sub_IR_low_reshap
 
 
 #mod
-sample_names <- names(sub_IR_mod[8:15])
+sample_names <- names(sub_IR_mod[6:13])
 sub_IR_mod_reshaped <- reshape(sub_IR_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -502,9 +512,9 @@ sub_IR_mod_reshaped$Strain = substr(sub_IR_mod_reshaped$Strain,1,nchar(sub_IR_mo
 sub_IR_mod_reshaped$Rep = substr(sub_IR_mod_reshaped$Rep,nchar(sub_IR_mod_reshaped$Rep),nchar(sub_IR_mod_reshaped$Rep))
 
 #hi
-sample_names <- names(sub_IR_hi[8:15])
+sample_names <- names(sub_IR_hi[6:13])
 sub_IR_hi_reshaped <- reshape(sub_IR_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -549,8 +559,16 @@ ord_tot_log_IRs <- tot_log_IRs[order(tot_log_IRs$abbrev_VB_ID, tot_log_IRs$sampl
 
 
 #All on log scale
-par(mar= c(5,5,4,1))
-lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_IRs, type = "p", cex = 1.5, xlab = "IR", ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10), ylim = c(0,10), cex.lab =1.5, col = c("red", "darkblue"), err.width = 0, pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+par(mar= c(8,5,4,1))
+lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_IRs,             type = "p", cex = 2, xlab = "", legend = F,
+            ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
+            ylim = c(0,8), cex.lab =1.8, cex.axis = 1.5, col = c("red", "darkblue"), 
+            pch = c(16,16), xaxt='n', err.width = 0, ci.fun= boot.fn)
+labels <- unique(ord_tot_log_IRs$CquiIR)
+labels2 <- gsub('\\*|#','', labels)
+axis(side = 1, at = seq(c(1:10)), labels=labels2, las = 2, cex.axis =1.5)
+legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
+            pch = c(16,16), cex = 1.5)
 
 print(merged_Fritz_IR_dataset)
             
@@ -560,10 +578,9 @@ print(merged_Fritz_IR_dataset)
 
 ```{r Examining subsets of GR data, results = "show"}
 
-merged_Fritz_GR_dataset$sumCounts <- rowSums(merged_Fritz_GR_dataset[,c(8:15)])
+merged_Fritz_GR_dataset$sumCounts <- rowSums(merged_Fritz_GR_dataset[,c(6:13)])
 
 #getting numbers of GRs according to overall number of reads aligned
-NROW(subset(merged_Fritz_GR_dataset, sumCounts>=1))
 
 NROW(subset(merged_Fritz_GR_dataset, sumCounts>=10))
 
@@ -590,9 +607,9 @@ sub_GR_hi <- subset(merged_Fritz_GR_dataset, sumCounts >=1000)
 
 ```{r Reshaping full GR data, results = "show"}
 #low
-sample_names <- names(sub_GR_low[8:15])
+sample_names <- names(sub_GR_low[6:13])
 sub_GR_low_reshaped <- reshape(sub_GR_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -611,9 +628,9 @@ sub_GR_low_reshaped_CPIJ007931$sumCounts #good news
 
 
 #mod
-sample_names <- names(sub_GR_mod[8:15])
+sample_names <- names(sub_GR_mod[6:13])
 sub_GR_mod_reshaped <- reshape(sub_GR_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -626,9 +643,9 @@ sub_GR_mod_reshaped$Strain = substr(sub_GR_mod_reshaped$Strain,1,nchar(sub_GR_mo
 sub_GR_mod_reshaped$Rep = substr(sub_GR_mod_reshaped$Rep,nchar(sub_GR_mod_reshaped$Rep),nchar(sub_GR_mod_reshaped$Rep))
 
 #hi
-sample_names <- names(sub_GR_hi[8:15])
+sample_names <- names(sub_GR_hi[6:13])
 sub_GR_hi_reshaped <- reshape(sub_GR_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -683,10 +700,9 @@ print(merged_Fritz_GR_dataset)
 
 ```{r Examining subsets of SNMP data, results = "show"}
 
-merged_Fritz_SNMP_dataset$sumCounts <- rowSums(merged_Fritz_SNMP_dataset[,c(8:15)])
+merged_Fritz_SNMP_dataset$sumCounts <- rowSums(merged_Fritz_SNMP_dataset[,c(6:13)])
 
 #getting numbers of SNMPs according to overall number of reads aligned
-NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=1))
 
 NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=10))
 
@@ -700,10 +716,9 @@ print(merged_Fritz_SNMP_dataset)
 
 ```{r Examining subsets of CSP data, results = "show"}
 
-merged_Fritz_CSP_dataset$sumCounts <- rowSums(merged_Fritz_CSP_dataset[,c(8:15)])
+merged_Fritz_CSP_dataset$sumCounts <- rowSums(merged_Fritz_CSP_dataset[,c(6:13)])
 
 #getting numbers of CSPs according to overall number of reads aligned
-NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=1))
 
 NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=10))
 
@@ -717,10 +732,9 @@ print(merged_Fritz_CSP_dataset)
 
 ```{r Examining subsets of PPK data, results = "show"}
 
-merged_Fritz_PPK_dataset$sumCounts <- rowSums(merged_Fritz_PPK_dataset[,c(8:15)])
+merged_Fritz_PPK_dataset$sumCounts <- rowSums(merged_Fritz_PPK_dataset[,c(6:13)])
 
 #getting numbers of PPKs according to overall number of reads aligned
-NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=1))
 
 NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=10))
 
