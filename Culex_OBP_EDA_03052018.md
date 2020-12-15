@@ -27,6 +27,7 @@ library(sciplot)
 #use this to specify the file paths
 genes_detected <- read.table("~/Desktop/CulexRNAseq/data/CALparousF_v_PipEvanF_AllGenes_LFCS.txt", header = F)#using LCFS for the parous v pip contrast
 genes_detected$abbrev_VB_ID <- gsub("-RA", "", genes_detected$V1) #removing mods to VB ID
+genes_detected <- genes_detected[,c(1,4)]#removing irrelevant columns
 
 gff3 <- read.table("~/Desktop/CulexRNAseq/data/Culex-quinquefasciatus-Johannesburg_BASEFEATURES_CpipJ2.4.gff3", sep="\t", stringsAsFactors=F)
 
@@ -169,15 +170,10 @@ nrow(merged_sig_Fritz_PPK_dataset_CALPvPip)
 ##### Now looking at general differences in expression, not accounting for multiple comparisons. It is well known that p-value adjustments for multiple comparisons help reduce false positives, but lead to extraordinary underestimation of true positives (i.e. see Schurch et al. 2016). Furthermore, we used whole heads for our RNA-seq analysis, so if a particular gene wasn't differentially expressed, it could be simply because it's mRNA was in such low copy number in our library relative to the total mRNA in the head. I started by looking at OBPs, and I first wanted to understand how many were detected in my dataset.
 
 ``` r
-merged_Fritz_OBP_dataset$sumCounts <- rowSums(merged_Fritz_OBP_dataset[,c(8:15)])
+merged_Fritz_OBP_dataset$sumCounts <- rowSums(merged_Fritz_OBP_dataset[,c(6:13)])
 
 #getting numbers of OBPs according to overall number of reads aligned
-NROW(subset(merged_Fritz_OBP_dataset, sumCounts>=1))
-```
 
-    ## [1] 42
-
-``` r
 NROW(subset(merged_Fritz_OBP_dataset, sumCounts>=10))
 ```
 
@@ -209,9 +205,9 @@ sub_OBP_hi <- subset(merged_Fritz_OBP_dataset, sumCounts >=1000)
 
 ``` r
 #low
-sample_names <- names(sub_OBP_low[8:15])
+sample_names <- names(sub_OBP_low[6:13])
 sub_OBP_low_reshaped <- reshape(sub_OBP_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -238,9 +234,9 @@ sub_OBP_low_reshaped_CPIJ002108$sumCounts #good news
 
 ``` r
 #mod
-sample_names <- names(sub_OBP_mod[8:15])
+sample_names <- names(sub_OBP_mod[6:13])
 sub_OBP_mod_reshaped <- reshape(sub_OBP_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -267,9 +263,9 @@ sub_OBP_mod_reshaped_CPIJ002109$sumCounts #good news
 
 ``` r
 #hi
-sample_names <- names(sub_OBP_hi[8:15])
+sample_names <- names(sub_OBP_hi[6:13])
 sub_OBP_hi_reshaped <- reshape(sub_OBP_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -323,13 +319,18 @@ tot_log_OBPs$sample <- paste(tot_log_OBPs$Strain, sep = "_", tot_log_OBPs$Rep)
 ord_tot_log_OBPs <- tot_log_OBPs[order(tot_log_OBPs$abbrev_VB_ID, tot_log_OBPs$sample),]
 
 #On log scale
-par(mar= c(5,5,4,1))
-lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = Strain, data = ord_tot_log_OBPs, type = "p", cex = 1.7,
-            xlab = "OBP", ylab = "Log10 Mean Norm Read Count (+/- 95% CIs)", 
+par(mar= c(6.5,5,4,1))
+lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = Strain, data = ord_tot_log_OBPs, type = "p", cex = 1.7, legend = F,
+            xlab = "", ylab = "Log10 Mean Norm Read Count (+/- 95% CIs)", 
             ylim = c(0,5), xlim = c(0,length(unique(tot_log_OBPs$abbrev_VB_ID))),
             cex.lab =1.8, cex.axis = 1.5, cex.leg = 1.2, 
             col = c("red", "darkblue"), 
             pch = c(16,16), xaxt = "n", ci.fun= boot.fn)
+labels <- unique(ord_tot_log_OBPs$CquiOBP)
+labels2 <- gsub('\\*|#','', labels)
+axis(side = 1, at = seq(c(1:42)), labels=labels2, las = 2, cex =1.3)
+legend(35, 5, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
+            pch = c(16,16), cex = 1.5)
 ```
 
 <img src="Culex_OBP_EDA_03052018_files/figure-markdown_github/Plots_OBP_Mean_expression-4.png" style="display: block; margin: auto;" />
@@ -338,49 +339,49 @@ lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = 
 print(merged_Fritz_OBP_dataset)
 ```
 
-    ##    abbrev_VB_ID            V1          V2          V3     gene_name2
-    ## 1    CPIJ001365 CPIJ001365-RA -0.50763134 0.104179864           OBP7
-    ## 2    CPIJ001730 CPIJ001730-RA -0.10726175          NA           OBP4
-    ## 3    CPIJ002105 CPIJ002105-RA -0.11095025 0.593981482 protein_coding
-    ## 4    CPIJ002106 CPIJ002106-RA -0.09825997 0.770878855 protein_coding
-    ## 5    CPIJ002108 CPIJ002108-RA -1.85810130          NA protein_coding
-    ## 6    CPIJ002109 CPIJ002109-RA  0.10927848          NA protein_coding
-    ## 7    CPIJ002111 CPIJ002111-RA -0.24351514          NA protein_coding
-    ## 8    CPIJ004145 CPIJ004145-RA -0.68774391 0.482543631 protein_coding
-    ## 9    CPIJ004630 CPIJ004630-RA -0.33471517 0.081086055 protein_coding
-    ## 10   CPIJ004634 CPIJ004634-RA -0.09121957 0.825299568 protein_coding
-    ## 11   CPIJ006551 CPIJ006551-RA -0.30637336 0.248858261          OBP11
-    ## 12   CPIJ006608 CPIJ006608-RA  0.52129358          NA protein_coding
-    ## 13   CPIJ007604 CPIJ007604-RA -0.44083945 0.306793549           OBP1
-    ## 14   CPIJ007608 CPIJ007608-RA -0.41922945 0.384729104           OBP5
-    ## 15   CPIJ007611 CPIJ007611-RA -0.39031230 0.543712660           OBP3
-    ## 16   CPIJ007617 CPIJ007617-RA -0.20019597 0.710354935           OBP2
-    ## 17   CPIJ007932 CPIJ007932-RA  0.02774028          NA          OBP38
-    ## 18   CPIJ008793 CPIJ008793-RA -0.64173204 0.002094877           OBP6
-    ## 19   CPIJ008867 CPIJ008867-RA -0.07355424 0.851470758 protein_coding
-    ## 20   CPIJ008868 CPIJ008868-RA -0.26763408 0.308226566 protein_coding
-    ## 21   CPIJ009568 CPIJ009568-RA -0.10820271 0.752918081           OBP8
-    ## 22   CPIJ009586 CPIJ009586-RA -0.63678517 0.021160264          OBP14
-    ## 23   CPIJ010367 CPIJ010367-RA  0.05110195 0.870065187 protein_coding
-    ## 24   CPIJ010787 CPIJ010787-RA  0.18607023 0.805299345          OBP51
-    ## 25   CPIJ010788 CPIJ010788-RA -0.62775010          NA          OBP52
-    ## 26   CPIJ010789 CPIJ010789-RA -0.63692039 0.024739190          OBP53
-    ## 27   CPIJ012714 CPIJ012714-RA -0.86435564          NA          OBP15
-    ## 28   CPIJ012716 CPIJ012716-RA -0.69314119          NA          OBP17
-    ## 29   CPIJ012717 CPIJ012717-RA  0.60714181          NA          OBP18
-    ## 30   CPIJ012718 CPIJ012718-RA -0.36009694 0.384729104          OBP19
-    ## 31   CPIJ012719 CPIJ012719-RA  0.35556038 0.599894642          OBP20
-    ## 32   CPIJ013976 CPIJ013976-RA  0.00000000          NA          OBP10
-    ## 33   CPIJ014525 CPIJ014525-RA  0.06361307 0.886654436          OBP24
-    ## 34   CPIJ015944 CPIJ015944-RA -0.82808904          NA protein_coding
-    ## 35   CPIJ016479 CPIJ016479-RA -0.19349793          NA          OBP32
-    ## 36   CPIJ016948 CPIJ016948-RA -0.22859907          NA           OBP9
-    ## 37   CPIJ016949 CPIJ016949-RA -0.57121079 0.160321985          OBP12
-    ## 38   CPIJ016952 CPIJ016952-RA -0.44943787 0.392769184          OBP13
-    ## 39   CPIJ016965 CPIJ016965-RA -0.31287428 0.280181210          OBP28
-    ## 40   CPIJ016966 CPIJ016966-RA -0.21460859 0.454971889          OBP29
-    ## 41   CPIJ016967 CPIJ016967-RA -0.22379550          NA          OBP30
-    ## 42   CPIJ019610 CPIJ019610-RA -0.82406275          NA          OBP36
+    ##    abbrev_VB_ID            V1     gene_name2
+    ## 1    CPIJ001365 CPIJ001365-RA           OBP7
+    ## 2    CPIJ001730 CPIJ001730-RA           OBP4
+    ## 3    CPIJ002105 CPIJ002105-RA protein_coding
+    ## 4    CPIJ002106 CPIJ002106-RA protein_coding
+    ## 5    CPIJ002108 CPIJ002108-RA protein_coding
+    ## 6    CPIJ002109 CPIJ002109-RA protein_coding
+    ## 7    CPIJ002111 CPIJ002111-RA protein_coding
+    ## 8    CPIJ004145 CPIJ004145-RA protein_coding
+    ## 9    CPIJ004630 CPIJ004630-RA protein_coding
+    ## 10   CPIJ004634 CPIJ004634-RA protein_coding
+    ## 11   CPIJ006551 CPIJ006551-RA          OBP11
+    ## 12   CPIJ006608 CPIJ006608-RA protein_coding
+    ## 13   CPIJ007604 CPIJ007604-RA           OBP1
+    ## 14   CPIJ007608 CPIJ007608-RA           OBP5
+    ## 15   CPIJ007611 CPIJ007611-RA           OBP3
+    ## 16   CPIJ007617 CPIJ007617-RA           OBP2
+    ## 17   CPIJ007932 CPIJ007932-RA          OBP38
+    ## 18   CPIJ008793 CPIJ008793-RA           OBP6
+    ## 19   CPIJ008867 CPIJ008867-RA protein_coding
+    ## 20   CPIJ008868 CPIJ008868-RA protein_coding
+    ## 21   CPIJ009568 CPIJ009568-RA           OBP8
+    ## 22   CPIJ009586 CPIJ009586-RA          OBP14
+    ## 23   CPIJ010367 CPIJ010367-RA protein_coding
+    ## 24   CPIJ010787 CPIJ010787-RA          OBP51
+    ## 25   CPIJ010788 CPIJ010788-RA          OBP52
+    ## 26   CPIJ010789 CPIJ010789-RA          OBP53
+    ## 27   CPIJ012714 CPIJ012714-RA          OBP15
+    ## 28   CPIJ012716 CPIJ012716-RA          OBP17
+    ## 29   CPIJ012717 CPIJ012717-RA          OBP18
+    ## 30   CPIJ012718 CPIJ012718-RA          OBP19
+    ## 31   CPIJ012719 CPIJ012719-RA          OBP20
+    ## 32   CPIJ013976 CPIJ013976-RA          OBP10
+    ## 33   CPIJ014525 CPIJ014525-RA          OBP24
+    ## 34   CPIJ015944 CPIJ015944-RA protein_coding
+    ## 35   CPIJ016479 CPIJ016479-RA          OBP32
+    ## 36   CPIJ016948 CPIJ016948-RA           OBP9
+    ## 37   CPIJ016949 CPIJ016949-RA          OBP12
+    ## 38   CPIJ016952 CPIJ016952-RA          OBP13
+    ## 39   CPIJ016965 CPIJ016965-RA          OBP28
+    ## 40   CPIJ016966 CPIJ016966-RA          OBP29
+    ## 41   CPIJ016967 CPIJ016967-RA          OBP30
+    ## 42   CPIJ019610 CPIJ019610-RA          OBP36
     ##                                                            gene_desc2
     ## 1                                                      protein_coding
     ## 2                                                      protein_coding
@@ -514,15 +515,10 @@ print(merged_Fritz_OBP_dataset)
 ##### Now turning to ORs. As with OBPs, I want to understand how many ORs I can detect in my dataset.
 
 ``` r
-merged_Fritz_OR_dataset$sumCounts <- rowSums(merged_Fritz_OR_dataset[,c(8:15)])
+merged_Fritz_OR_dataset$sumCounts <- rowSums(merged_Fritz_OR_dataset[,c(6:13)])
 
 #getting numbers of ORs according to overall number of reads aligned
-NROW(subset(merged_Fritz_OR_dataset, sumCounts>=1))
-```
 
-    ## [1] 10
-
-``` r
 NROW(subset(merged_Fritz_OR_dataset, sumCounts>=10))
 ```
 
@@ -553,9 +549,9 @@ sub_OR_hi <- subset(merged_Fritz_OR_dataset, sumCounts >=1000)
 
 ``` r
 #low
-sample_names <- names(sub_OR_low[8:15])
+sample_names <- names(sub_OR_low[6:13])
 sub_OR_low_reshaped <- reshape(sub_OR_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -582,9 +578,9 @@ sub_OR_low_reshaped_CPIJ002479$sumCounts #good news
 
 ``` r
 #mod
-sample_names <- names(sub_OR_mod[8:15])
+sample_names <- names(sub_OR_mod[6:13])
 sub_OR_mod_reshaped <- reshape(sub_OR_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -598,9 +594,9 @@ sub_OR_mod_reshaped$Rep = substr(sub_OR_mod_reshaped$Rep,nchar(sub_OR_mod_reshap
 
 
 #hi
-sample_names <- names(sub_OR_hi[8:15])
+sample_names <- names(sub_OR_hi[6:13])
 sub_OR_hi_reshaped <- reshape(sub_OR_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -654,11 +650,16 @@ tot_log_ORs$sample <- paste(tot_log_ORs$Strain, sep = "_", tot_log_ORs$Rep)
 ord_tot_log_ORs <- tot_log_ORs[order(tot_log_ORs$abbrev_VB_ID, tot_log_ORs$sample),]
 
 #All on log scale
-par(mar= c(5,5,4,1))
-lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_ORs,             type = "p", cex = 1.5, xlab = "OR", 
+par(mar= c(6.5,5,4,1))
+lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_ORs,             type = "p", cex = 2, xlab = "", legend = F,
             ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
-            ylim = c(0,10), cex.lab =1.5, col = c("red", "darkblue"), 
+            ylim = c(0,8), cex.lab =1.8, cex.axis = 1.5, col = c("red", "darkblue"), 
             pch = c(16,16), xaxt='n', err.width = 0, ci.fun= boot.fn)
+labels <- unique(ord_tot_log_ORs$CquiOR)
+labels2 <- gsub('\\*|#','', labels)
+axis(side = 1, at = seq(c(1:10)), labels=labels2, las = 2, cex.axis =1.5)
+legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
+            pch = c(16,16), cex = 1.5)
 ```
 
 <img src="Culex_OBP_EDA_03052018_files/figure-markdown_github/Plots_OR_Mean_expression-4.png" style="display: block; margin: auto;" />
@@ -667,17 +668,17 @@ lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data =
 print(merged_Fritz_OR_dataset)
 ```
 
-    ##    abbrev_VB_ID            V1          V2        V3     gene_name2
-    ## 1    CPIJ002147 CPIJ002147-RA -0.02721086 0.9293286 protein_coding
-    ## 2    CPIJ002479 CPIJ002479-RA  0.36550588        NA protein_coding
-    ## 3    CPIJ004162 CPIJ004162-RA  0.05668855        NA           Or36
-    ## 4    CPIJ004164 CPIJ004164-RA -0.25925150 0.6829648           Or38
-    ## 5    CPIJ013944 CPIJ013944-RA  0.14579300        NA protein_coding
-    ## 6    CPIJ013954 CPIJ013954-RA -1.01771485        NA protein_coding
-    ## 7    CPIJ015178 CPIJ015178-RA -2.24541786        NA          Or125
-    ## 8    CPIJ016433 CPIJ016433-RA -0.28809708        NA          Or137
-    ## 9    CPIJ039859 CPIJ039859-RA -1.63908267        NA          Or132
-    ## 10   CPIJ039866 CPIJ039866-RA -0.46167602        NA           Or93
+    ##    abbrev_VB_ID            V1     gene_name2
+    ## 1    CPIJ002147 CPIJ002147-RA protein_coding
+    ## 2    CPIJ002479 CPIJ002479-RA protein_coding
+    ## 3    CPIJ004162 CPIJ004162-RA           Or36
+    ## 4    CPIJ004164 CPIJ004164-RA           Or38
+    ## 5    CPIJ013944 CPIJ013944-RA protein_coding
+    ## 6    CPIJ013954 CPIJ013954-RA protein_coding
+    ## 7    CPIJ015178 CPIJ015178-RA          Or125
+    ## 8    CPIJ016433 CPIJ016433-RA          Or137
+    ## 9    CPIJ039859 CPIJ039859-RA          Or132
+    ## 10   CPIJ039866 CPIJ039866-RA           Or93
     ##                                                                                gene_desc2
     ## 1  Circadian locomoter output cycles kaput protein [Source:UniProtKB/TrEMBL%3BAcc:B0W3Y1]
     ## 2                                   odorant receptor Or2 [Source:VB Community Annotation]
@@ -715,15 +716,10 @@ print(merged_Fritz_OR_dataset)
 ##### Examining IRs. Checking how many recovered in my dataset.
 
 ``` r
-merged_Fritz_IR_dataset$sumCounts <- rowSums(merged_Fritz_IR_dataset[,c(8:15)])
+merged_Fritz_IR_dataset$sumCounts <- rowSums(merged_Fritz_IR_dataset[,c(6:13)])
 
 #getting numbers of ORs according to overall number of reads aligned
-NROW(subset(merged_Fritz_IR_dataset, sumCounts>=1))
-```
 
-    ## [1] 10
-
-``` r
 NROW(subset(merged_Fritz_IR_dataset, sumCounts>=10))
 ```
 
@@ -753,9 +749,9 @@ sub_IR_hi <- subset(merged_Fritz_IR_dataset, sumCounts >=1000)
 
 ``` r
 #low
-sample_names <- names(sub_IR_low[8:15])
+sample_names <- names(sub_IR_low[6:13])
 sub_IR_low_reshaped <- reshape(sub_IR_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -769,9 +765,9 @@ sub_IR_low_reshaped$Rep = substr(sub_IR_low_reshaped$Rep,nchar(sub_IR_low_reshap
 
 
 #mod
-sample_names <- names(sub_IR_mod[8:15])
+sample_names <- names(sub_IR_mod[6:13])
 sub_IR_mod_reshaped <- reshape(sub_IR_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -784,9 +780,9 @@ sub_IR_mod_reshaped$Strain = substr(sub_IR_mod_reshaped$Strain,1,nchar(sub_IR_mo
 sub_IR_mod_reshaped$Rep = substr(sub_IR_mod_reshaped$Rep,nchar(sub_IR_mod_reshaped$Rep),nchar(sub_IR_mod_reshaped$Rep))
 
 #hi
-sample_names <- names(sub_IR_hi[8:15])
+sample_names <- names(sub_IR_hi[6:13])
 sub_IR_hi_reshaped <- reshape(sub_IR_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -841,8 +837,16 @@ ord_tot_log_IRs <- tot_log_IRs[order(tot_log_IRs$abbrev_VB_ID, tot_log_IRs$sampl
 
 
 #All on log scale
-par(mar= c(5,5,4,1))
-lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_IRs, type = "p", cex = 1.5, xlab = "IR", ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10), ylim = c(0,10), cex.lab =1.5, col = c("red", "darkblue"), err.width = 0, pch = c(16,16), xaxt='n', ci.fun= boot.fn)
+par(mar= c(8,5,4,1))
+lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_IRs,             type = "p", cex = 2, xlab = "", legend = F,
+            ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
+            ylim = c(0,8), cex.lab =1.8, cex.axis = 1.5, col = c("red", "darkblue"), 
+            pch = c(16,16), xaxt='n', err.width = 0, ci.fun= boot.fn)
+labels <- unique(ord_tot_log_IRs$CquiIR)
+labels2 <- gsub('\\*|#','', labels)
+axis(side = 1, at = seq(c(1:10)), labels=labels2, las = 2, cex.axis =1.5)
+legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
+            pch = c(16,16), cex = 1.5)
 ```
 
 <img src="Culex_OBP_EDA_03052018_files/figure-markdown_github/Plots_IR_Mean_expression-4.png" style="display: block; margin: auto;" />
@@ -851,17 +855,17 @@ lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data =
 print(merged_Fritz_IR_dataset)
 ```
 
-    ##    abbrev_VB_ID            V1          V2        V3     gene_name2
-    ## 1    CPIJ005249 CPIJ005249-RA -0.01978597 0.9636061 protein_coding
-    ## 2    CPIJ007793 CPIJ007793-RA -0.42956164        NA protein_coding
-    ## 3    CPIJ008619 CPIJ008619-RA -0.15143569        NA protein_coding
-    ## 4    CPIJ010125 CPIJ010125-RA -0.05309856 0.9013825       CYP12F14
-    ## 5    CPIJ013866 CPIJ013866-RA -0.41734422        NA protein_coding
-    ## 6    CPIJ016953 CPIJ016953-RA -0.04497034        NA protein_coding
-    ## 7    CPIJ016954 CPIJ016954-RA -1.19458229        NA protein_coding
-    ## 8    CPIJ016961 CPIJ016961-RA -1.25442526        NA protein_coding
-    ## 9    CPIJ019300 CPIJ019300-RA -0.01259863 0.9800969 protein_coding
-    ## 10   CPIJ020118 CPIJ020118-RA -0.46524765        NA protein_coding
+    ##    abbrev_VB_ID            V1     gene_name2
+    ## 1    CPIJ005249 CPIJ005249-RA protein_coding
+    ## 2    CPIJ007793 CPIJ007793-RA protein_coding
+    ## 3    CPIJ008619 CPIJ008619-RA protein_coding
+    ## 4    CPIJ010125 CPIJ010125-RA       CYP12F14
+    ## 5    CPIJ013866 CPIJ013866-RA protein_coding
+    ## 6    CPIJ016953 CPIJ016953-RA protein_coding
+    ## 7    CPIJ016954 CPIJ016954-RA protein_coding
+    ## 8    CPIJ016961 CPIJ016961-RA protein_coding
+    ## 9    CPIJ019300 CPIJ019300-RA protein_coding
+    ## 10   CPIJ020118 CPIJ020118-RA protein_coding
     ##                                                                                 gene_desc2
     ## 1                           uncharacterized protein [Source:UniProtKB/TrEMBL%3BAcc:B0WFT4]
     ## 2                           uncharacterized protein [Source:UniProtKB/TrEMBL%3BAcc:B0WKG8]
@@ -899,15 +903,10 @@ print(merged_Fritz_IR_dataset)
 ### Lastly, GR results.
 
 ``` r
-merged_Fritz_GR_dataset$sumCounts <- rowSums(merged_Fritz_GR_dataset[,c(8:15)])
+merged_Fritz_GR_dataset$sumCounts <- rowSums(merged_Fritz_GR_dataset[,c(6:13)])
 
 #getting numbers of GRs according to overall number of reads aligned
-NROW(subset(merged_Fritz_GR_dataset, sumCounts>=1))
-```
 
-    ## [1] 10
-
-``` r
 NROW(subset(merged_Fritz_GR_dataset, sumCounts>=10))
 ```
 
@@ -939,9 +938,9 @@ sub_GR_hi <- subset(merged_Fritz_GR_dataset, sumCounts >=1000)
 
 ``` r
 #low
-sample_names <- names(sub_GR_low[8:15])
+sample_names <- names(sub_GR_low[6:13])
 sub_GR_low_reshaped <- reshape(sub_GR_low, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -968,9 +967,9 @@ sub_GR_low_reshaped_CPIJ007931$sumCounts #good news
 
 ``` r
 #mod
-sample_names <- names(sub_GR_mod[8:15])
+sample_names <- names(sub_GR_mod[6:13])
 sub_GR_mod_reshaped <- reshape(sub_GR_mod, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -983,9 +982,9 @@ sub_GR_mod_reshaped$Strain = substr(sub_GR_mod_reshaped$Strain,1,nchar(sub_GR_mo
 sub_GR_mod_reshaped$Rep = substr(sub_GR_mod_reshaped$Rep,nchar(sub_GR_mod_reshaped$Rep),nchar(sub_GR_mod_reshaped$Rep))
 
 #hi
-sample_names <- names(sub_GR_hi[8:15])
+sample_names <- names(sub_GR_hi[6:13])
 sub_GR_hi_reshaped <- reshape(sub_GR_hi, 
-                         varying = list(8:15),
+                         varying = list(6:13),
                          direction="long",
                          idvar= "abbrev_VB_ID",
                          times=sample_names,
@@ -1050,17 +1049,17 @@ lineplot.CI(abbrev_VB_ID, log_Norm_Read_Count, group = Strain, data = tot_log_GR
 print(merged_Fritz_GR_dataset)
 ```
 
-    ##    abbrev_VB_ID            V1           V2        V3     gene_name2
-    ## 1    CPIJ000740 CPIJ000740-RA  0.525382461        NA           Gr20
-    ## 2    CPIJ006622 CPIJ006622-RA -0.346476450 0.2509123            Gr1
-    ## 3    CPIJ007321 CPIJ007321-RA -0.177829632 0.6830871            Gr3
-    ## 4    CPIJ007380 CPIJ007380-RA -0.503772086 0.2378771            Gr2
-    ## 5    CPIJ011563 CPIJ011563-RA -0.007282037        NA protein_coding
-    ## 6    CPIJ011564 CPIJ011564-RA  0.669974446        NA protein_coding
-    ## 7    CPIJ014409 CPIJ014409-RA  0.207191124        NA           Gr35
-    ## 8    CPIJ014450 CPIJ014450-RA  0.244120014        NA           Gr30
-    ## 9    CPIJ015721 CPIJ015721-RA -0.648309100        NA            Gr8
-    ## 10   CPIJ016215 CPIJ016215-RA  0.206941316        NA           Gr10
+    ##    abbrev_VB_ID            V1     gene_name2
+    ## 1    CPIJ000740 CPIJ000740-RA           Gr20
+    ## 2    CPIJ006622 CPIJ006622-RA            Gr1
+    ## 3    CPIJ007321 CPIJ007321-RA            Gr3
+    ## 4    CPIJ007380 CPIJ007380-RA            Gr2
+    ## 5    CPIJ011563 CPIJ011563-RA protein_coding
+    ## 6    CPIJ011564 CPIJ011564-RA protein_coding
+    ## 7    CPIJ014409 CPIJ014409-RA           Gr35
+    ## 8    CPIJ014450 CPIJ014450-RA           Gr30
+    ## 9    CPIJ015721 CPIJ015721-RA            Gr8
+    ## 10   CPIJ016215 CPIJ016215-RA           Gr10
     ##                                                       gene_desc2
     ## 1                                                 protein_coding
     ## 2                                                 protein_coding
@@ -1096,15 +1095,10 @@ print(merged_Fritz_GR_dataset)
     ## 10  17.349636   3.185850  15.851513   Gr10   68.33348
 
 ``` r
-merged_Fritz_SNMP_dataset$sumCounts <- rowSums(merged_Fritz_SNMP_dataset[,c(8:15)])
+merged_Fritz_SNMP_dataset$sumCounts <- rowSums(merged_Fritz_SNMP_dataset[,c(6:13)])
 
 #getting numbers of SNMPs according to overall number of reads aligned
-NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=1))
-```
 
-    ## [1] 4
-
-``` r
 NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=10))
 ```
 
@@ -1126,11 +1120,11 @@ NROW(subset(merged_Fritz_SNMP_dataset, sumCounts>=1000))
 print(merged_Fritz_SNMP_dataset)
 ```
 
-    ##   abbrev_VB_ID            V1          V2        V3     gene_name2
-    ## 1   CPIJ002160 CPIJ002160-RA  0.08465799 0.8162972 protein_coding
-    ## 2   CPIJ014330 CPIJ014330-RA -0.50118730 0.2074241 protein_coding
-    ## 3   CPIJ014331 CPIJ014331-RA -0.37627113 0.4903430 protein_coding
-    ## 4   CPIJ014332 CPIJ014332-RA -0.91194495        NA protein_coding
+    ##   abbrev_VB_ID            V1     gene_name2
+    ## 1   CPIJ002160 CPIJ002160-RA protein_coding
+    ## 2   CPIJ014330 CPIJ014330-RA protein_coding
+    ## 3   CPIJ014331 CPIJ014331-RA protein_coding
+    ## 4   CPIJ014332 CPIJ014332-RA protein_coding
     ##                                                                   gene_desc2
     ## 1             uncharacterized protein [Source:UniProtKB/TrEMBL%3BAcc:B0W3Z4]
     ## 2         sensory neuron membrane protein-1 [Source:VB Community Annotation]
@@ -1148,15 +1142,10 @@ print(merged_Fritz_SNMP_dataset)
     ## 4  23.85575    4.2478  11.32251    SNMP1c  196.3279
 
 ``` r
-merged_Fritz_CSP_dataset$sumCounts <- rowSums(merged_Fritz_CSP_dataset[,c(8:15)])
+merged_Fritz_CSP_dataset$sumCounts <- rowSums(merged_Fritz_CSP_dataset[,c(6:13)])
 
 #getting numbers of CSPs according to overall number of reads aligned
-NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=1))
-```
 
-    ## [1] 11
-
-``` r
 NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=10))
 ```
 
@@ -1178,18 +1167,18 @@ NROW(subset(merged_Fritz_CSP_dataset, sumCounts>=1000))
 print(merged_Fritz_CSP_dataset)
 ```
 
-    ##    abbrev_VB_ID            V1          V2         V3     gene_name2
-    ## 1    CPIJ002600 CPIJ002600-RA -0.18278250 0.70326189 protein_coding
-    ## 2    CPIJ002601 CPIJ002601-RA -0.13343605         NA protein_coding
-    ## 3    CPIJ002605 CPIJ002605-RA  0.37192606 0.25539721 protein_coding
-    ## 4    CPIJ002608 CPIJ002608-RA -0.51421452 0.05755085 protein_coding
-    ## 5    CPIJ002609 CPIJ002609-RA -0.15900298 0.44398344 protein_coding
-    ## 6    CPIJ002612 CPIJ002612-RA -1.10923472         NA protein_coding
-    ## 7    CPIJ002614 CPIJ002614-RA -0.61795819         NA protein_coding
-    ## 8    CPIJ002618 CPIJ002618-RA  1.91424333         NA protein_coding
-    ## 9    CPIJ002628 CPIJ002628-RA -0.08355482 0.81988941 protein_coding
-    ## 10   CPIJ002629 CPIJ002629-RA -0.36109417 0.04169162 protein_coding
-    ## 11   CPIJ017094 CPIJ017094-RA -0.07376972         NA protein_coding
+    ##    abbrev_VB_ID            V1     gene_name2
+    ## 1    CPIJ002600 CPIJ002600-RA protein_coding
+    ## 2    CPIJ002601 CPIJ002601-RA protein_coding
+    ## 3    CPIJ002605 CPIJ002605-RA protein_coding
+    ## 4    CPIJ002608 CPIJ002608-RA protein_coding
+    ## 5    CPIJ002609 CPIJ002609-RA protein_coding
+    ## 6    CPIJ002612 CPIJ002612-RA protein_coding
+    ## 7    CPIJ002614 CPIJ002614-RA protein_coding
+    ## 8    CPIJ002618 CPIJ002618-RA protein_coding
+    ## 9    CPIJ002628 CPIJ002628-RA protein_coding
+    ## 10   CPIJ002629 CPIJ002629-RA protein_coding
+    ## 11   CPIJ017094 CPIJ017094-RA protein_coding
     ##                                                                      gene_desc2
     ## 1                uncharacterized protein [Source:UniProtKB/TrEMBL%3BAcc:B0W7I5]
     ## 2                uncharacterized protein [Source:UniProtKB/TrEMBL%3BAcc:B0W7I6]
@@ -1240,15 +1229,10 @@ print(merged_Fritz_CSP_dataset)
     ## 11    453.98870
 
 ``` r
-merged_Fritz_PPK_dataset$sumCounts <- rowSums(merged_Fritz_PPK_dataset[,c(8:15)])
+merged_Fritz_PPK_dataset$sumCounts <- rowSums(merged_Fritz_PPK_dataset[,c(6:13)])
 
 #getting numbers of PPKs according to overall number of reads aligned
-NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=1))
-```
 
-    ## [1] 2
-
-``` r
 NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=10))
 ```
 
@@ -1270,9 +1254,9 @@ NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=1000))
 print(merged_Fritz_PPK_dataset)
 ```
 
-    ##   abbrev_VB_ID            V1         V2 V3     gene_name2
-    ## 1   CPIJ007315 CPIJ007315-RA 0.06142016 NA protein_coding
-    ## 2   CPIJ012546 CPIJ012546-RA 0.51141830 NA protein_coding
+    ##   abbrev_VB_ID            V1     gene_name2
+    ## 1   CPIJ007315 CPIJ007315-RA protein_coding
+    ## 2   CPIJ012546 CPIJ012546-RA protein_coding
     ##                                          gene_desc2 Description
     ## 1 Pickpocket [Source:UniProtKB/TrEMBL%3BAcc:B0WIZ9]          NA
     ## 2 Pickpocket [Source:UniProtKB/TrEMBL%3BAcc:B0X0S2]          NA
