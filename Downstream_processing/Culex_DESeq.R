@@ -362,11 +362,11 @@ sum(res05$padj < 0.05 & abs(resLFC$log2FoldChange) > 0.58, na.rm=TRUE)
 
 #getting full gene list
 full_genes_CalparousF_PipF <- data.frame(c(paste(resLFC@rownames, sep = "", "-RA")), resLFC@listData$log2FoldChange, resLFC@listData$padj)#paste adds VB format to IDs
-write.table(full_genes_CalgravidF_CalparousF, file = "CALparousF_v_PipEvanF_AllGenes_LFCS.txt", 
+write.table(full_genes_CalparousF_PipF, file = "CALparousF_v_PipEvanF_AllGenes_LFCS.txt", 
             col.names = F, row.names = F, sep = "\t")
 
 full_genes__CalparousF_PipF <- data.frame(c(paste(res05@rownames, sep = "", "-RA")), res05@listData$log2FoldChange, res05@listData$padj)#paste adds VB format to IDs
-write.table(full_genes_CalgravidF_CalparousF, file = "CALparousF_v_PipEvanF_AllGenes_nonLFCS.txt", 
+write.table(full_genes_CalparousF_PipF, file = "CALparousF_v_PipEvanF_AllGenes_nonLFCS.txt", 
             col.names = F, row.names = F, sep = "\t")
 
 
