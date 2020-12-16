@@ -57,6 +57,17 @@ GRs <- read.csv("~/Desktop/CulexRNAseq/data/GR_download_20190311121015.csv", hea
 CSPs <- read.csv("~/Desktop/CulexRNAseq/data/Culex_CSPs_2013_edited.csv", header = T)
 PPKs <- read.csv("~/Desktop/CulexRNAseq/data/Pickpocket_download_20190311162142.csv", header = T)
 
+#The 13 opsins - making dataset
+OPS_abbrev_VB_ID <- c("CPIJ004067", "CPIJ005000", "CPIJ009246", "CPIJ011419", "CPIJ011571", "CPIJ011573", "CPIJ011574", "CPIJ0011576", "CPIJ012052", "CPIJ013056", "CPIJ013408", "CPIJ014334", "CPIJ020021")
+OPS_gene <- c('Gprop1', 'Gprop2','Gprop3', 'Gprop4','Gprop6', 'Gprop7', 'Gprop8','Gprop9', 'Gprop5', 'Gprop10', 'Gprop11', 'Gprop12', 'Gprop13')
+OPS <- data.frame(cbind(OPS_abbrev_VB_ID, OPS_gene))
+
+#making SNMP dataset
+accession <- c("CPIJ002160", "CPIJ014332", "CPIJ014331", "CPIJ014330")
+SNMP_name <- c("SNMP2", "SNMP1c", "SNMP1b", "SNMP1a")
+SNMPs <- data.frame(cbind(accession, SNMP_name))
+
+#the DEGs
 Sig_CALG_CALP <- read.table("~/Desktop/CulexRNAseq/data/CALgravidF_v_CALparousF_LFCS_padj05.txt", header = F)
 Sig_CALG_CALP$abbrev_VB_ID <- gsub("-RA", "", Sig_CALG_CALP$V1) #removing mods to VB ID
 
@@ -69,11 +80,6 @@ merged_CALP_Pip <- merge(Sig_CALP_Pip, ids3, by.x = "abbrev_VB_ID", by.y = "ID")
 
 ORs$abbrev_VB_ID <- ORs$New_VB_ID 
 ORs$abbrev_VB_ID <- gsub("-PA", "", ORs$abbrev_VB_ID) #removing mods to VB ID
-
-#making SNMP dataset
-accession <- c("CPIJ002160", "CPIJ014332", "CPIJ014331", "CPIJ014330")
-SNMP_name <- c("SNMP2", "SNMP1c", "SNMP1b", "SNMP1a")
-SNMPs <- data.frame(cbind(accession, SNMP_name))
 
 #just pulling out relevant columns from Leal_datasets
 sub_OBPs <- OBPs[,c(1:3)]
@@ -90,6 +96,7 @@ merged_Fritz_GR_dataset <- merge(merged_Fritz_withCounts, sub_GRs, by.x = "abbre
 merged_Fritz_SNMP_dataset <- merge(merged_Fritz_withCounts, SNMPs, by.x = "abbrev_VB_ID", by.y = "accession")
 merged_Fritz_CSP_dataset <- merge(merged_Fritz_withCounts, sub_CSPs, by.x = "abbrev_VB_ID", by.y = "VectorBase.ID")
 merged_Fritz_PPK_dataset <- merge(merged_Fritz_withCounts, sub_PPKs, by.x = "abbrev_VB_ID", by.y = "accession")
+merged_Fritz_OPS_dataset <- merge(merged_Fritz_withCounts, OPS, by.x = "abbrev_VB_ID", by.y = "OPS_abbrev_VB_ID")
 ```
 
 ##### What numbers of genes from each of these families actually showed up as differentially expressed according to our DESeq analysis in the first place?
@@ -101,71 +108,233 @@ merged_sig_Fritz_OBP_dataset_CALPvPip <- merge(merged_Fritz_OBP_dataset, Sig_CAL
 
 #Printing Diff Expressed OBPs
 merged_sig_Fritz_OBP_dataset_CALGvCALP$abbrev_VB_ID
-nrow(merged_sig_Fritz_OBP_dataset_CALGvCALP)
-merged_sig_Fritz_OBP_dataset_CALPvPip$abbrev_VB_ID
-nrow(merged_sig_Fritz_OBP_dataset_CALPvPip)
+```
 
+    ## character(0)
+
+``` r
+nrow(merged_sig_Fritz_OBP_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
+merged_sig_Fritz_OBP_dataset_CALPvPip$abbrev_VB_ID
+```
+
+    ##  [1] "CPIJ001730" "CPIJ002108" "CPIJ002109" "CPIJ002111" "CPIJ004145"
+    ##  [6] "CPIJ007617" "CPIJ009568" "CPIJ010367" "CPIJ010787" "CPIJ012716"
+    ## [11] "CPIJ012717" "CPIJ012719" "CPIJ013976" "CPIJ014525" "CPIJ016479"
+    ## [16] "CPIJ016949" "CPIJ016966" "CPIJ019610"
+
+``` r
+nrow(merged_sig_Fritz_OBP_dataset_CALPvPip)
+```
+
+    ## [1] 18
+
+``` r
 #ORs for each pair-wise comparison
 merged_sig_Fritz_OR_dataset_CALGvCALP <- merge(merged_Fritz_OR_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
 merged_sig_Fritz_OR_dataset_CALPvPip <- merge(merged_Fritz_OR_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed ORs
 merged_sig_Fritz_OR_dataset_CALGvCALP$abbrev_VB_ID
-nrow(merged_sig_Fritz_OR_dataset_CALGvCALP)
-merged_sig_Fritz_OR_dataset_CALPvPip$abbrev_VB_ID 
-nrow(merged_sig_Fritz_OR_dataset_CALPvPip)
+```
 
+    ## character(0)
+
+``` r
+nrow(merged_sig_Fritz_OR_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
+merged_sig_Fritz_OR_dataset_CALPvPip$abbrev_VB_ID 
+```
+
+    ## [1] "CPIJ016433"
+
+``` r
+nrow(merged_sig_Fritz_OR_dataset_CALPvPip)
+```
+
+    ## [1] 1
+
+``` r
 #IRs for each pair-wise comparison
 merged_sig_Fritz_IR_dataset_CALGvCALP <- merge(merged_Fritz_IR_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
 merged_sig_Fritz_IR_dataset_CALPvPip <- merge(merged_Fritz_IR_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed IRs
 merged_sig_Fritz_IR_dataset_CALGvCALP$abbrev_VB_ID
-nrow(merged_sig_Fritz_IR_dataset_CALGvCALP)
-merged_sig_Fritz_IR_dataset_CALPvPip$abbrev_VB_ID
-nrow(merged_sig_Fritz_IR_dataset_CALPvPip)
+```
 
+    ## character(0)
+
+``` r
+nrow(merged_sig_Fritz_IR_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
+merged_sig_Fritz_IR_dataset_CALPvPip$abbrev_VB_ID
+```
+
+    ## character(0)
+
+``` r
+nrow(merged_sig_Fritz_IR_dataset_CALPvPip)
+```
+
+    ## [1] 0
+
+``` r
 #GRs for each pair-wise comparison
 merged_sig_Fritz_GR_dataset_CALGvCALP <- merge(merged_Fritz_GR_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
 merged_sig_Fritz_GR_dataset_CALPvPip <- merge(merged_Fritz_GR_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed GRs
 merged_sig_Fritz_GR_dataset_CALGvCALP$abbrev_VB_ID
-nrow(merged_sig_Fritz_GR_dataset_CALGvCALP)
-merged_sig_Fritz_GR_dataset_CALPvPip$abbrev_VB_ID
-nrow(merged_sig_Fritz_GR_dataset_CALPvPip)
+```
 
+    ## character(0)
+
+``` r
+nrow(merged_sig_Fritz_GR_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
+merged_sig_Fritz_GR_dataset_CALPvPip$abbrev_VB_ID
+```
+
+    ## [1] "CPIJ011564"
+
+``` r
+nrow(merged_sig_Fritz_GR_dataset_CALPvPip)
+```
+
+    ## [1] 1
+
+``` r
 #SNMPs for each pair-wise comparison
 merged_sig_Fritz_SNMP_dataset_CALGvCALP <- merge(merged_Fritz_SNMP_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
 merged_sig_Fritz_SNMP_dataset_CALPvPip <- merge(merged_Fritz_SNMP_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed SNMPs
 merged_sig_Fritz_SNMP_dataset_CALGvCALP$abbrev_VB_ID
+```
+
+    ## character(0)
+
+``` r
 nrow(merged_sig_Fritz_SNMP_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
 merged_sig_Fritz_SNMP_dataset_CALPvPip$abbrev_VB_ID
+```
+
+    ## [1] "CPIJ014330"
+
+``` r
 nrow(merged_sig_Fritz_SNMP_dataset_CALPvPip)
+```
 
+    ## [1] 1
 
+``` r
 #CSPs for each pair-wise comparison
 merged_sig_Fritz_CSP_dataset_CALGvCALP <- merge(merged_Fritz_CSP_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
 merged_sig_Fritz_CSP_dataset_CALPvPip <- merge(merged_Fritz_CSP_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed CSPs
 merged_sig_Fritz_CSP_dataset_CALGvCALP$abbrev_VB_ID
-nrow(merged_sig_Fritz_CSP_dataset_CALGvCALP)
-merged_sig_Fritz_CSP_dataset_CALPvPip$abbrev_VB_ID
-nrow(merged_sig_Fritz_CSP_dataset_CALPvPip)
+```
 
+    ## character(0)
+
+``` r
+nrow(merged_sig_Fritz_CSP_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
+merged_sig_Fritz_CSP_dataset_CALPvPip$abbrev_VB_ID
+```
+
+    ## [1] "CPIJ002605" "CPIJ002618" "CPIJ002628"
+
+``` r
+nrow(merged_sig_Fritz_CSP_dataset_CALPvPip)
+```
+
+    ## [1] 3
+
+``` r
 #PPKs for each pair-wise comparison
 merged_sig_Fritz_PPK_dataset_CALGvCALP <- merge(merged_Fritz_PPK_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
 merged_sig_Fritz_PPK_dataset_CALPvPip <- merge(merged_Fritz_PPK_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
 
 #Printing Diff Expressed PPKs
 merged_sig_Fritz_PPK_dataset_CALGvCALP$abbrev_VB_ID
+```
+
+    ## character(0)
+
+``` r
 nrow(merged_sig_Fritz_PPK_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
 merged_sig_Fritz_PPK_dataset_CALPvPip$abbrev_VB_ID
+```
+
+    ## [1] "CPIJ007315"
+
+``` r
 nrow(merged_sig_Fritz_PPK_dataset_CALPvPip)
 ```
+
+    ## [1] 1
+
+``` r
+#Opsins for each pair-wise comparison
+merged_sig_Fritz_OPS_dataset_CALGvCALP <- merge(merged_Fritz_OPS_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_OPS_dataset_CALPvPip <- merge(merged_Fritz_OPS_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
+
+#Printing Diff Expressed OPS
+merged_sig_Fritz_OPS_dataset_CALGvCALP$abbrev_VB_ID
+```
+
+    ## character(0)
+
+``` r
+nrow(merged_sig_Fritz_OPS_dataset_CALGvCALP)
+```
+
+    ## [1] 0
+
+``` r
+merged_sig_Fritz_OPS_dataset_CALPvPip$abbrev_VB_ID
+```
+
+    ## [1] "CPIJ004067"
+
+``` r
+nrow(merged_sig_Fritz_OPS_dataset_CALPvPip)
+```
+
+    ## [1] 1
 
 ##### Now looking at general differences in expression, not accounting for multiple comparisons. It is well known that p-value adjustments for multiple comparisons help reduce false positives, but lead to extraordinary underestimation of true positives (i.e. see Schurch et al. 2016). Furthermore, we used whole heads for our RNA-seq analysis, so if a particular gene wasn't differentially expressed, it could be simply because it's mRNA was in such low copy number in our library relative to the total mRNA in the head. I started by looking at OBPs, and I first wanted to understand how many were detected in my dataset.
 
@@ -319,6 +488,7 @@ tot_log_OBPs$sample <- paste(tot_log_OBPs$Strain, sep = "_", tot_log_OBPs$Rep)
 ord_tot_log_OBPs <- tot_log_OBPs[order(tot_log_OBPs$abbrev_VB_ID, tot_log_OBPs$sample),]
 
 #On log scale
+#png(filename = "DiffExp_OBPs.png", units = "px", height = 600, width = 800)
 par(mar= c(6.5,5,4,1))
 lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = Strain, data = ord_tot_log_OBPs, type = "p", cex = 1.7, legend = F,
             xlab = "", ylab = "Log10 Mean Norm Read Count (+/- 95% CIs)", 
@@ -336,6 +506,8 @@ legend(35, 5, legend = c("BG1", "AG2"), col = c("red", "darkblue"),
 <img src="Culex_OBP_EDA_03052018_files/figure-markdown_github/Plots_OBP_Mean_expression-4.png" style="display: block; margin: auto;" />
 
 ``` r
+#dev.off()
+
 print(merged_Fritz_OBP_dataset)
 ```
 
@@ -650,6 +822,7 @@ tot_log_ORs$sample <- paste(tot_log_ORs$Strain, sep = "_", tot_log_ORs$Rep)
 ord_tot_log_ORs <- tot_log_ORs[order(tot_log_ORs$abbrev_VB_ID, tot_log_ORs$sample),]
 
 #All on log scale
+#png(filename = "DiffExp_ORs.png", units = "px", height = 600, width = 800)
 par(mar= c(6.5,5,4,1))
 lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_ORs,             type = "p", cex = 2, xlab = "", legend = F,
             ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
@@ -665,6 +838,8 @@ legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"),
 <img src="Culex_OBP_EDA_03052018_files/figure-markdown_github/Plots_OR_Mean_expression-4.png" style="display: block; margin: auto;" />
 
 ``` r
+#dev.off()
+
 print(merged_Fritz_OR_dataset)
 ```
 
@@ -837,6 +1012,7 @@ ord_tot_log_IRs <- tot_log_IRs[order(tot_log_IRs$abbrev_VB_ID, tot_log_IRs$sampl
 
 
 #All on log scale
+#png(filename = "DiffExp_IRs.png", units = "px", height = 600, width = 800)
 par(mar= c(8,5,4,1))
 lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_IRs,             type = "p", cex = 2, xlab = "", legend = F,
             ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
@@ -852,6 +1028,8 @@ legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"),
 <img src="Culex_OBP_EDA_03052018_files/figure-markdown_github/Plots_IR_Mean_expression-4.png" style="display: block; margin: auto;" />
 
 ``` r
+#dev.off()
+
 print(merged_Fritz_IR_dataset)
 ```
 
@@ -927,7 +1105,7 @@ NROW(subset(merged_Fritz_GR_dataset, sumCounts>=1000))
 ##### I pulled out lowly expressed, moderately expressed, and highly expressed genes and placed them in different dataframes for plotting expression level by mosquito strain.
 
 ``` r
-sub_GR_low <- subset(merged_Fritz_GR_dataset, sumCounts < 100)
+sub_GR_low <- subset(merged_Fritz_GR_dataset, sumCounts >=10 & sumCounts < 100)
 
 sub_GR_mod <- subset(merged_Fritz_GR_dataset, sumCounts >=100 & sumCounts < 1000)
 
@@ -952,20 +1130,6 @@ sub_GR_low_reshaped$Rep <- sub_GR_low_reshaped$Strain
 sub_GR_low_reshaped$Strain = substr(sub_GR_low_reshaped$Strain,1,nchar(sub_GR_low_reshaped$Strain)-1)
 sub_GR_low_reshaped$Rep = substr(sub_GR_low_reshaped$Rep,nchar(sub_GR_low_reshaped$Rep),nchar(sub_GR_low_reshaped$Rep))
 
-#sanity check for reformatting
-sub_GR_low_reshaped_CPIJ007931 <- subset(sub_GR_low_reshaped, ID == "CPIJ007931")
-sum(sub_GR_low_reshaped_CPIJ007931$Norm_Read_Count)
-```
-
-    ## [1] NA
-
-``` r
-sub_GR_low_reshaped_CPIJ007931$sumCounts #good news
-```
-
-    ## [1] NA
-
-``` r
 #mod
 sample_names <- names(sub_GR_mod[6:13])
 sub_GR_mod_reshaped <- reshape(sub_GR_mod, 
@@ -1266,3 +1430,57 @@ print(merged_Fritz_PPK_dataset)
     ##   PipEvanF3 PipEvanF4 description sumCounts
     ## 1   12.7434  7.925757  Pickpocket 451.12379
     ## 2    0.0000  5.661255  Pickpocket  41.04409
+
+``` r
+merged_Fritz_OPS_dataset$sumCounts <- rowSums(merged_Fritz_OPS_dataset[,c(6:13)])
+
+#getting numbers of OPS according to overall number of reads aligned
+
+NROW(subset(merged_Fritz_OPS_dataset, sumCounts>=10))
+```
+
+    ## [1] 8
+
+``` r
+NROW(subset(merged_Fritz_OPS_dataset, sumCounts>=100))
+```
+
+    ## [1] 8
+
+``` r
+NROW(subset(merged_Fritz_OPS_dataset, sumCounts>=1000))
+```
+
+    ## [1] 7
+
+``` r
+print(merged_Fritz_OPS_dataset)
+```
+
+    ##   abbrev_VB_ID            V1 gene_name2     gene_desc2 Description
+    ## 1   CPIJ004067 CPIJ004067-RA     GPROP1 protein_coding          NA
+    ## 2   CPIJ005000 CPIJ005000-RA     GPROP2 protein_coding          NA
+    ## 3   CPIJ009246 CPIJ009246-RA     GPROP3 protein_coding          NA
+    ## 4   CPIJ011419 CPIJ011419-RA     GPROP4 protein_coding          NA
+    ## 5   CPIJ011571 CPIJ011571-RA     GPROP6 protein_coding          NA
+    ## 6   CPIJ011573 CPIJ011573-RA     GPROP7 protein_coding          NA
+    ## 7   CPIJ012052 CPIJ012052-RA     GPROP5 protein_coding          NA
+    ## 8   CPIJ014334 CPIJ014334-RA    GPROP12 protein_coding          NA
+    ##    CALparousF1  CALparousF2  CALparousF3  CALparousF4    PipEvanF1
+    ## 1 3.952318e+02 3.883545e+02 3.255857e+02     402.0414     245.0090
+    ## 2 2.616092e+04 2.245162e+04 2.845367e+04   23980.8102   31672.9800
+    ## 3 4.494839e+04 4.574008e+04 5.167728e+04   42872.9255   54910.6506
+    ## 4 2.052684e+02 2.198047e+02 2.608283e+02     180.9186     178.1884
+    ## 5 3.799375e+05 3.956525e+05 4.015776e+05  406488.7092  565252.7045
+    ## 6 2.214738e+02 2.286758e+02 2.725206e+02     260.3696     331.9819
+    ## 7 1.334829e+06 1.299935e+06 1.545614e+06 1452352.4177 1409115.6291
+    ## 8 6.842281e+01 3.844119e+01 8.454435e+01      88.0662     116.6709
+    ##      PipEvanF2    PipEvanF3    PipEvanF4 OPS_gene    sumCounts
+    ## 1     245.0636     213.4519     191.3504   Gprop1 2.406088e+03
+    ## 2   23765.7485   33168.9429   33845.2448   Gprop2 2.234999e+05
+    ## 3   48253.6756   51227.4008   61193.6338   Gprop3 4.008240e+05
+    ## 4     172.4120     138.0535     148.3249   Gprop4 1.503799e+03
+    ## 5  534187.7072  508751.5206  692032.9011   Gprop6 3.883881e+06
+    ## 6     409.8852     318.5850     554.8030   Gprop7 2.598295e+03
+    ## 7 1448058.1054 1358841.3473 1659036.3374   Gprop5 1.150778e+07
+    ## 8     135.5440     106.1950     116.6218  Gprop12 7.545064e+02
