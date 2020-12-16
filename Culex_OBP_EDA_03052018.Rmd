@@ -65,6 +65,17 @@ GRs <- read.csv("~/Desktop/CulexRNAseq/data/GR_download_20190311121015.csv", hea
 CSPs <- read.csv("~/Desktop/CulexRNAseq/data/Culex_CSPs_2013_edited.csv", header = T)
 PPKs <- read.csv("~/Desktop/CulexRNAseq/data/Pickpocket_download_20190311162142.csv", header = T)
 
+#The 13 opsins - making dataset
+OPS_abbrev_VB_ID <- c("CPIJ004067", "CPIJ005000", "CPIJ009246", "CPIJ011419", "CPIJ011571", "CPIJ011573", "CPIJ011574", "CPIJ0011576", "CPIJ012052", "CPIJ013056", "CPIJ013408", "CPIJ014334", "CPIJ020021")
+OPS_gene <- c('Gprop1', 'Gprop2','Gprop3', 'Gprop4','Gprop6', 'Gprop7', 'Gprop8','Gprop9', 'Gprop5', 'Gprop10', 'Gprop11', 'Gprop12', 'Gprop13')
+OPS <- data.frame(cbind(OPS_abbrev_VB_ID, OPS_gene))
+
+#making SNMP dataset
+accession <- c("CPIJ002160", "CPIJ014332", "CPIJ014331", "CPIJ014330")
+SNMP_name <- c("SNMP2", "SNMP1c", "SNMP1b", "SNMP1a")
+SNMPs <- data.frame(cbind(accession, SNMP_name))
+
+#the DEGs
 Sig_CALG_CALP <- read.table("~/Desktop/CulexRNAseq/data/CALgravidF_v_CALparousF_LFCS_padj05.txt", header = F)
 Sig_CALG_CALP$abbrev_VB_ID <- gsub("-RA", "", Sig_CALG_CALP$V1) #removing mods to VB ID
 
@@ -77,11 +88,6 @@ merged_CALP_Pip <- merge(Sig_CALP_Pip, ids3, by.x = "abbrev_VB_ID", by.y = "ID")
 
 ORs$abbrev_VB_ID <- ORs$New_VB_ID 
 ORs$abbrev_VB_ID <- gsub("-PA", "", ORs$abbrev_VB_ID) #removing mods to VB ID
-
-#making SNMP dataset
-accession <- c("CPIJ002160", "CPIJ014332", "CPIJ014331", "CPIJ014330")
-SNMP_name <- c("SNMP2", "SNMP1c", "SNMP1b", "SNMP1a")
-SNMPs <- data.frame(cbind(accession, SNMP_name))
 
 #just pulling out relevant columns from Leal_datasets
 sub_OBPs <- OBPs[,c(1:3)]
@@ -98,7 +104,7 @@ merged_Fritz_GR_dataset <- merge(merged_Fritz_withCounts, sub_GRs, by.x = "abbre
 merged_Fritz_SNMP_dataset <- merge(merged_Fritz_withCounts, SNMPs, by.x = "abbrev_VB_ID", by.y = "accession")
 merged_Fritz_CSP_dataset <- merge(merged_Fritz_withCounts, sub_CSPs, by.x = "abbrev_VB_ID", by.y = "VectorBase.ID")
 merged_Fritz_PPK_dataset <- merge(merged_Fritz_withCounts, sub_PPKs, by.x = "abbrev_VB_ID", by.y = "accession")
-
+merged_Fritz_OPS_dataset <- merge(merged_Fritz_withCounts, OPS, by.x = "abbrev_VB_ID", by.y = "OPS_abbrev_VB_ID")
 
 
 ```
@@ -106,7 +112,7 @@ merged_Fritz_PPK_dataset <- merge(merged_Fritz_withCounts, sub_PPKs, by.x = "abb
 
 #####What numbers of genes from each of these families actually showed up as differentially expressed according to our DESeq analysis in the first place?
 
-```{r merging DEseq results with gene families, results = "hide"}
+```{r merging DEseq results with gene families, results = "show"}
 
 #OBPs for each pair-wise comparison
 merged_sig_Fritz_OBP_dataset_CALGvCALP <- merge(merged_Fritz_OBP_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
@@ -178,6 +184,18 @@ merged_sig_Fritz_PPK_dataset_CALGvCALP$abbrev_VB_ID
 nrow(merged_sig_Fritz_PPK_dataset_CALGvCALP)
 merged_sig_Fritz_PPK_dataset_CALPvPip$abbrev_VB_ID
 nrow(merged_sig_Fritz_PPK_dataset_CALPvPip)
+
+
+#Opsins for each pair-wise comparison
+merged_sig_Fritz_OPS_dataset_CALGvCALP <- merge(merged_Fritz_OPS_dataset, Sig_CALG_CALP, by = "abbrev_VB_ID")
+merged_sig_Fritz_OPS_dataset_CALPvPip <- merge(merged_Fritz_OPS_dataset, Sig_CALP_Pip, by = "abbrev_VB_ID")
+
+#Printing Diff Expressed OPS
+merged_sig_Fritz_OPS_dataset_CALGvCALP$abbrev_VB_ID
+nrow(merged_sig_Fritz_OPS_dataset_CALGvCALP)
+merged_sig_Fritz_OPS_dataset_CALPvPip$abbrev_VB_ID
+nrow(merged_sig_Fritz_OPS_dataset_CALPvPip)
+
 ```
 #####Now looking at general differences in expression, not accounting for multiple comparisons.  It is well known that p-value adjustments for multiple comparisons help reduce false positives, but lead to extraordinary underestimation of true positives (i.e. see Schurch et al. 2016).  Furthermore, we used whole heads for our RNA-seq analysis, so if a particular gene wasn't differentially expressed, it could be simply because it's mRNA was in such low copy number in our library relative to the total mRNA in the head.  I started by looking at OBPs, and I first wanted to understand how many were detected in my dataset.  
 
@@ -300,6 +318,7 @@ tot_log_OBPs$sample <- paste(tot_log_OBPs$Strain, sep = "_", tot_log_OBPs$Rep)
 ord_tot_log_OBPs <- tot_log_OBPs[order(tot_log_OBPs$abbrev_VB_ID, tot_log_OBPs$sample),]
 
 #On log scale
+#png(filename = "DiffExp_OBPs.png", units = "px", height = 600, width = 800)
 par(mar= c(6.5,5,4,1))
 lineplot.CI((as.numeric(as.factor(abbrev_VB_ID))), log_Norm_Read_Count, group = Strain, data = ord_tot_log_OBPs, type = "p", cex = 1.7, legend = F,
             xlab = "", ylab = "Log10 Mean Norm Read Count (+/- 95% CIs)", 
@@ -312,6 +331,7 @@ labels2 <- gsub('\\*|#','', labels)
 axis(side = 1, at = seq(c(1:42)), labels=labels2, las = 2, cex =1.3)
 legend(35, 5, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
             pch = c(16,16), cex = 1.5)
+#dev.off()
 
 print(merged_Fritz_OBP_dataset)
             
@@ -432,6 +452,7 @@ tot_log_ORs$sample <- paste(tot_log_ORs$Strain, sep = "_", tot_log_ORs$Rep)
 ord_tot_log_ORs <- tot_log_ORs[order(tot_log_ORs$abbrev_VB_ID, tot_log_ORs$sample),]
 
 #All on log scale
+#png(filename = "DiffExp_ORs.png", units = "px", height = 600, width = 800)
 par(mar= c(6.5,5,4,1))
 lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_ORs,             type = "p", cex = 2, xlab = "", legend = F,
             ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
@@ -442,6 +463,7 @@ labels2 <- gsub('\\*|#','', labels)
 axis(side = 1, at = seq(c(1:10)), labels=labels2, las = 2, cex.axis =1.5)
 legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
             pch = c(16,16), cex = 1.5)
+#dev.off()
 
 print(merged_Fritz_OR_dataset)
   
@@ -559,6 +581,7 @@ ord_tot_log_IRs <- tot_log_IRs[order(tot_log_IRs$abbrev_VB_ID, tot_log_IRs$sampl
 
 
 #All on log scale
+#png(filename = "DiffExp_IRs.png", units = "px", height = 600, width = 800)
 par(mar= c(8,5,4,1))
 lineplot.CI(as.factor(abbrev_VB_ID), log_Norm_Read_Count, group = Strain, data = ord_tot_log_IRs,             type = "p", cex = 2, xlab = "", legend = F,
             ylab = "Log10 of Mean Normalized Read Count (+/- 95% CIs)", xlim = c(1,10),
@@ -569,6 +592,8 @@ labels2 <- gsub('\\*|#','', labels)
 axis(side = 1, at = seq(c(1:10)), labels=labels2, las = 2, cex.axis =1.5)
 legend(9, 8, legend = c("BG1", "AG2"), col = c("red", "darkblue"), 
             pch = c(16,16), cex = 1.5)
+
+#dev.off()
 
 print(merged_Fritz_IR_dataset)
             
@@ -594,7 +619,7 @@ NROW(subset(merged_Fritz_GR_dataset, sumCounts>=1000))
 
 ```{r subsetting GR data for plotting, results = "hide"}
 
-sub_GR_low <- subset(merged_Fritz_GR_dataset, sumCounts < 100)
+sub_GR_low <- subset(merged_Fritz_GR_dataset, sumCounts >=10 & sumCounts < 100)
 
 sub_GR_mod <- subset(merged_Fritz_GR_dataset, sumCounts >=100 & sumCounts < 1000)
 
@@ -620,12 +645,6 @@ names(sub_GR_low_reshaped)[names(sub_GR_low_reshaped) == 'time'] <- 'Strain'
 sub_GR_low_reshaped$Rep <- sub_GR_low_reshaped$Strain
 sub_GR_low_reshaped$Strain = substr(sub_GR_low_reshaped$Strain,1,nchar(sub_GR_low_reshaped$Strain)-1)
 sub_GR_low_reshaped$Rep = substr(sub_GR_low_reshaped$Rep,nchar(sub_GR_low_reshaped$Rep),nchar(sub_GR_low_reshaped$Rep))
-
-#sanity check for reformatting
-sub_GR_low_reshaped_CPIJ007931 <- subset(sub_GR_low_reshaped, ID == "CPIJ007931")
-sum(sub_GR_low_reshaped_CPIJ007931$Norm_Read_Count)
-sub_GR_low_reshaped_CPIJ007931$sumCounts #good news
-
 
 #mod
 sample_names <- names(sub_GR_mod[6:13])
@@ -743,3 +762,19 @@ NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=100))
 NROW(subset(merged_Fritz_PPK_dataset, sumCounts>=1000))
 
 print(merged_Fritz_PPK_dataset)
+```
+
+```{r Examining subsets of OPS data, results = "show"}
+
+merged_Fritz_OPS_dataset$sumCounts <- rowSums(merged_Fritz_OPS_dataset[,c(6:13)])
+
+#getting numbers of OPS according to overall number of reads aligned
+
+NROW(subset(merged_Fritz_OPS_dataset, sumCounts>=10))
+
+NROW(subset(merged_Fritz_OPS_dataset, sumCounts>=100))
+
+NROW(subset(merged_Fritz_OPS_dataset, sumCounts>=1000))
+
+print(merged_Fritz_OPS_dataset)
+```
