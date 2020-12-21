@@ -45,14 +45,14 @@ str(full_ba_set)
 #####################################################################
 #(1) acceptance of either host during day 1
 #####################################################################
-#recode host response - all nr values as 1 and c/h as a 0
+#recode host response - all nr values as 0 and c/h as a 1
 full_ba_set$host_resp<- ifelse(full_ba_set$host == "nr", 0, 1)
 
-table(unique(full_ba_set$strain,full_ba_set$new.mosq.ID))#getting numbers of individs tested per strain
-
-
 T1_ba_set <- subset(full_ba_set, time == 1)
-table(unique(T1_ba_set$strain,T1_ba_set$new.mosq.ID))#getting numbers of individs that responded at time1
+table(T1_ba_set$strain)#getting numbers of individs tested at time1
+
+resp_only <- subset(T1_ba_set, host_resp == 1)
+table(resp_only$strain)#getting numbers of responders tested at time1
 
 
 #No'time' in model since all testing for this analysis took place on day 1
