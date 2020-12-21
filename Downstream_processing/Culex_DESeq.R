@@ -265,13 +265,15 @@ plotMA(resLFC, ylim=c(-3,3))
 dev.off()
 
 #plotting differences in gene expression using lfcShrink output.
-pdf("EV_gravidVparous.pdf",width=8,height=6,paper='special')
+pdf("EV_gravidVparous.pdf",width=8,height=6,paper='special') #gene names after selectLab are all diff exp genes
 EnhancedVolcano(resLFC,
                 lab = rownames(resLFC),
                 x = 'log2FoldChange',
                 y = 'pvalue',
-                #selectLab = c('CPIJ003456'),
+                #selectLab = c('CPIJ003142', 'CPIJ004468', 'CPIJ004690', 'CPIJ008018', 'CPIJ008747', 'CPIJ010041', 'CPIJ011084', 'CPIJ011244',
+                #'CPIJ015908','CPIJ018848', 'CPIJ003456', 'CPIJ004365', 'CPIJ004417', 'CPIJ008256', 'CPIJ012990', 'CPIJ014981'),
                 selectLab = NA,
+                #drawConnectors = TRUE,
                 xlim = c(-1.5, 1.5),
                 ylim = c(0,30),
                 pCutoff = 10e-6,
@@ -339,19 +341,24 @@ pdf("plotMA_parousVpip.pdf",width=6,height=6,paper='special')
 plotMA(resLFC, ylim=c(-3,3))
 dev.off()
 
-pdf("EV_parousVpip.pdf",width=8,height=6,paper='special')
+pdf("EV_parousVpip.pdf",width=8,height=6,paper='special') #gene labels commented out for selectLab are sig DE sensory genes.
 EnhancedVolcano(resLFC,
                 lab = rownames(resLFC),
                 x = 'log2FoldChange',
                 y = 'pvalue',
-                #selectLab = c('CPIJ003456'),
+                #selectLab = c("CPIJ001730", "CPIJ002108", "CPIJ002109", "CPIJ002111", "CPIJ004145","CPIJ007617",
+                              #"CPIJ009568", "CPIJ010367", "CPIJ010787", "CPIJ012716","CPIJ012717", "CPIJ012719",
+                             #"CPIJ013976", "CPIJ014525", "CPIJ016479","CPIJ016949", "CPIJ016966", "CPIJ019610",
+                             #"CPIJ016433", "CPIJ011564", "CPIJ014330","CPIJ002605", "CPIJ002618", "CPIJ002628",
+                              #"CPIJ007315", "CPIJ004067"),
                 selectLab = NA,
+                #drawConnectors = TRUE,
                 xlim = c(-10, 10),
                 ylim = c(0,200),
                 pCutoff = 10e-6,
                 FCcutoff = 0.58,
                 pointSize = 2.0,
-                labSize = 5.0)
+                labSize = 2.0)
 dev.off()
 
 #Looking at DGE from "standard" analysis.
