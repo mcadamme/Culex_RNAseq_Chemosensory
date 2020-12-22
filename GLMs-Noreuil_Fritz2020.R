@@ -42,6 +42,20 @@ full_ba_set$new.mosq.ID <- as.factor(full_ba_set$new.mosq.ID)
 full_ba_set <- full_ba_set[,-1]
 str(full_ba_set)
 
+
+#Getting Coll Site - allows for running within BG and AG models
+full_ba_set$Coll_Site <- as.character(full_ba_set$strain)
+str(full_ba_set)
+
+pattern <- "cal[A-z0-9_]{1,4}"
+pattern2 <- "mol_ca"
+replacement <- "BG"
+
+full_ba_set$Coll_Site <- gsub(pattern, replacement, full_ba_set$Coll_Site)
+full_ba_set$Coll_Site <- gsub(pattern2, replacement, full_ba_set$Coll_Site)
+full_ba_set$Coll_Site <- ifelse(full_ba_set$Coll_Site == "BG", 0, 1)
+
+
 #####################################################################
 #(1) acceptance of either host during day 1
 #####################################################################
@@ -104,10 +118,36 @@ mean_day1_resp
 boot_day1_resp <- tapply(T1_ba_set$host_resp, T1_ba_set$strain, boot.fn)
 boot_day1_resp
 
+
+ 
+########Within BG models
+BG_host_resp <- subset(T1_ba_set, Coll_Site == 0)
+
+model_full <- glmer(host_resp ~ 1 + strain + (1|chick), data = BG_host_resp, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+model_red1 <- glmer(host_resp ~ 1 + (1|chick), data = BG_host_resp, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+lrtest(model_red1, model_full)
+
+
+########Within AG models
+AG_host_resp <- subset(T1_ba_set, Coll_Site == 1)
+
+model_full <- glmer(host_resp ~ 1 + strain + (1|chick), data = AG_host_resp, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+model_red1 <- glmer(host_resp ~ 1 + (1|chick), data = AG_host_resp, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+lrtest(model_red1, model_full)
+
+###Note that in both cases, models support the results of 95% CI comparison between populations
+
 #####################################################################
 #(2) selection/preference for a human host
 #####################################################################
-#NOTE: sweep here then re-run code through setting up chick as a random effect (line 31)
 
 #Setting up the dataset
 #Host choice (i.e. chick vs. human) was examined for individuals across test dates.  
@@ -173,8 +213,39 @@ mean_host_hum <- tapply(resp_only_full_ba_set$host_hum, resp_only_full_ba_set$st
 mean_host_hum
 
 boot_host_hum <- tapply(resp_only_full_ba_set$host_hum, resp_only_full_ba_set$strain, boot.fn)
-boot_host_hum
+boot_host_hum 
 
+mean_host_chick <- tapply(resp_only_full_ba_set$host_chick, resp_only_full_ba_set$strain, mean)
+mean_host_chick
+
+boot_host_chick <- tapply(resp_only_full_ba_set$host_chick, resp_only_full_ba_set$strain, boot.fn)
+boot_host_chick
+
+
+########Within BG models
+BG_host_hum <- subset(resp_only_full_ba_set, Coll_Site == 0)
+
+model_full <- glmer(host_hum ~ 1 + strain + (1|chick), data = BG_host_hum, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+model_red1 <- glmer(host_hum ~ 1 + (1|chick), data = BG_host_hum, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+lrtest(model_red1, model_full)
+
+
+########Within AG models
+AG_host_hum <- subset(resp_only_full_ba_set, Coll_Site == 1)
+
+model_full <- glmer(host_hum ~ 1 + strain + (1|chick), data = AG_host_hum, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+model_red1 <- glmer(host_hum ~ 1 + (1|chick), data = AG_host_hum, 
+                    family = binomial, control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+lrtest(model_red1, model_full)
+
+#models here also support 95% CIs.
 
 #####################################################################
 ##(3) probability to alternate host across multi-day testing.
