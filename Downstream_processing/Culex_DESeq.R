@@ -438,11 +438,11 @@ sum(res05$padj < 0.05 & abs(resLFC$log2FoldChange) > 0.58, na.rm=TRUE)
 
 #getting full gene list
 full_genes_CalgravidF_PipEvanF <- data.frame(c(paste(resLFC@rownames, sep = "", "-RA")), resLFC@listData$log2FoldChange, resLFC@listData$padj)#paste adds VB format to IDs
-write.table(full_genes_CalgravidF_CalparousF, file = "CALgravidF_v_PipEvanF_AllGenes_LFCS.txt", 
+write.table(full_genes_CalgravidF_PipEvanF, file = "CALgravidF_v_PipEvanF_AllGenes_LFCS.txt", 
             col.names = F, row.names = F, sep = "\t")
 
 full_genes_CalgravidF_PipEvanF <- data.frame(c(paste(res05@rownames, sep = "", "-RA")), res05@listData$log2FoldChange, res05@listData$padj)#paste adds VB format to IDs
-write.table(full_genes_CalgravidF_CalparousF, file = "CALgravidF_v_PipEvanF_AllGenes_nonLFCS.txt", 
+write.table(full_genes_CalgravidF_PipEvanF, file = "CALgravidF_v_PipEvanF_AllGenes_nonLFCS.txt", 
             col.names = F, row.names = F, sep = "\t")
 
 
@@ -468,26 +468,6 @@ l3 <- dat_3[, c(1,2)]
 
 VennDiag <- GOVenn(l1,l2,l3, label=c('BG1 gravid v parous','AG2 v BG1 parous','AG2 v BG1 gravid'), plot = F)
 print(VennDiag$plot)
-
-
-
-###Heat map of sensory genes
-
-#Transform the count data for plotting and turn it into a matrix
-rld <- rlog(dds, blind=FALSE)
-mat <- assay(rld)
-
-#Create a list of genes of interest and what samples to compare
-idx <- resSig@rownames
-inx2<-c("CALparousF1", "CALparousF2", "CALparousF3", "CALparousF4", "PipEvanF1", "PipEvanF2", "PipEvanF3", "PipEvanF4")
-
-#Pull out select genes from the transformed count matrix
-select_genes<-mat[idx, inx2]
-
-#Create a heatmap and save it to a pdf
-pdf("heatmap.pdf",width=6,height=4,paper='special')
-pheatmap(select_genes,cluster_rows =F)
-dev.off()
 
 
 ######After looking at the first PCA, I wasn't sure about whether to drop BG_parous4.  In the end, I did not because it did not greatly impact the numbers of differentially expressed genes I recovered.
