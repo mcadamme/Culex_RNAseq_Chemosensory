@@ -1,6 +1,6 @@
 #!/bin/bash
 
-##Generate Genome Index (Genome Downloaded from Ensembel Jan 3 2018 v 2.37)
+##Generate Genome Index
 /home/megan/src/STAR-2.7.6a/source/STAR --runThreadN 7 --runMode genomeGenerate --genomeDir /media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/mosquito_genome_assemblies --genomeFastaFiles /media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/mosquito_genome_assemblies/Culex-quinquefasciatus-Johannesburg_SCAFFOLDS_CpipJ2.fa --sjdbGTFfile /media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/mosquito_genome_assemblies/Culex-quinquefasciatus-Johannesburg_BASEFEATURES_CpipJ2.4.gff3 --sjdbOverhang 150 --sjdbGTFtagExonParentTranscript Parent --genomeSAindexNbases 13.5
 
 
