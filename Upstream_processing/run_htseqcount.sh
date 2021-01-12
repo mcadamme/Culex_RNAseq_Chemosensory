@@ -7,7 +7,7 @@
 gffread /media/fritzlab/EE9C16C89C168AEB/Noreuil/trimmed_pairs/mosquito_genome_assemblies/Culex-quinquefasciatus-Johannesburg_BASEFEATURES_CpipJ2.4.gff3 -T -o /media/fritzlab/EE9C16C89C168AEB/Noreuil/trimmed_pairs/mosquito_genome_assemblies/Culex-quinquefasciatus-Johannesburg_BASEFEATURES_CpipJ2.4.gtf
 
 
-#HTSeq version 0.11.1
+#HTSeq version 0.11.1 - our libraries stranded so used the default.
 
 cd /media/fritzlab/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles
 
