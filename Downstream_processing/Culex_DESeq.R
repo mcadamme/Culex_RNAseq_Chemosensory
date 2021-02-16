@@ -11,12 +11,8 @@
 #Load Libraries
 library(DESeq2); library(pheatmap); library(ashr); library(EnhancedVolcano); library(magrittr); library(ggfortify); library(reshape2); library(ggplot2); library(GOplot); library(arm)
 
-#set working directory - tried multiple quality scores and aligning by gene and exon (no real difference in output)
-#so sticking with hiQual_ex
+#set working directory 
 hiQual_Ex<-("/media/fritzlab/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_exon/")
-#loQual_Ex<-("/media/fritzlab/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/lowQual_exon/")
-#hiQual_Ge<-("/media/fritzlab/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_gene/")
-#loQual_Ge<-("/media/fritzlab/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/lowQual_gene/")
 
 setwd(hiQual_Ex)
 
