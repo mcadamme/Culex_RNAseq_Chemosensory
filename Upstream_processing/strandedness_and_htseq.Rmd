@@ -1,0 +1,52 @@
+---
+title: "Plot showing library strandedness"
+author: "Megan Fritz"
+date: "written Jan. 8, 2021"
+output: github_document
+---
+  
+##Library strandedness and htseq-count
+
+The Illumina TruSeq Stranded mRNA Sample Prep Kit preserves directional information associated with first-strand synthesis.  Proper RNA-seq analysis with a stranded dataset requires careful attention to parameter settings in the read counting step of the bioinformatic analysis (Srinivasan et al. 2020).  
+
+Here, we are giving an example from our own dataset, using the criteria of Srinivasan et al. 2020 to show that we should be using the --stranded=reverse parameter setting in htseq-count.
+
+```{r loading datasets}
+
+strand_rev <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_exon/M2-1_S5_htseq", header = F) #run with htseq -s reverse
+strand_yes <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/Str_Yes/M2-1_S5_htseq", header = F) #run with htseq -s yes
+
+
+#merging dataset for plot
+merged <- merge(strand_rev, strand_yes, by = "V1")
+
+```
+
+```{r look at feature counts}
+
+#looking at the ambiguous and no_feature counts
+head(merged, n=2) #strand_rev has higher ambiguous alignments
+tail(merged, n=3) #but strand_yes has higher no_feature counts.  Right away, this indicates strand_rev is better.
+
+merged_red <- merged[c(-1,-2, -19796, -19797, -19798),]
+str(merged_red)
+
+#getting sums of counts to compare them - we see that there are many more reads counted toward features using strand_rev
+colSums(merged_red[,c(2,3)])
+
+```
+
+
+Srinivasan et al. 2020 state a plot of stranded ‘Reverse’ against ‘Yes’ read counts may be useful if cDNA library construction in unknown (but we knew ours). Stranded ‘Reverse’
+would be the correct option if the majority of the genes occur in a steep vertical line, while stranded ‘Yes’ would be correct if the majority of the genes were oriented in a horizontal line.  
+
+```{r generating plot to look at counts per feature}
+
+plot(merged_red$V2.y, merged_red$V2.x, ylim = c(0,5000), xlim = c(0,5000), ylab = "stranded_rev", xlab = "stranded_yes", title(main= "Feature counts by stranded parameter"))#axes truncated for better visualization
+
+#Even the max count value is higher for stranded_rev
+max(merged_red$V2.x)
+max(merged_red$V2.y)
+
+```
+
