@@ -13,8 +13,8 @@ Here, we are giving an example from our own dataset, using the criteria of Srini
 
 ```{r loading datasets}
 
-strand_rev <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_exon/M2-1_S5_htseq", header = F) #run with htseq -s reverse
-strand_yes <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/Str_Yes/M2-1_S5_htseq", header = F) #run with htseq -s yes
+strand_rev <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_exon/M2-1_S5_htseq", header = F) #ran with htseq -s reverse
+strand_yes <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/Str_Yes/M2-1_S5_htseq", header = F) #ran with htseq -s yes
 
 
 #merging dataset for plot
@@ -48,5 +48,21 @@ plot(merged_red$V2.y, merged_red$V2.x, ylim = c(0,5000), xlim = c(0,5000), ylab 
 max(merged_red$V2.x)
 max(merged_red$V2.y)
 
+```
+
+#Choosing gene versus exon counts
+```{r gene versus exon counts}
+
+strand_revG <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_gene/M2-1_S5_htseq", header = F) #ran with htseq -s reverse
+
+#merging dataset for decision
+merged <- merge(strand_rev, strand_revG, by = "V1")
+
+merged$diff <- merged$V2.x-merged$V2.y
+head(merged)
+sum(merged$diff)
+
+
+#no diff here, so using exon dataset.
 ```
 

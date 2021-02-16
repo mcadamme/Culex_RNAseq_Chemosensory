@@ -10,8 +10,8 @@ The Illumina TruSeq Stranded mRNA Sample Prep Kit preserves directional informat
 Here, we are giving an example from our own dataset, using the criteria of Srinivasan et al. 2020 to show that we should be using the --stranded=reverse parameter setting in htseq-count.
 
 ``` r
-strand_rev <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_exon/M2-1_S5_htseq", header = F) #run with htseq -s reverse
-strand_yes <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/Str_Yes/M2-1_S5_htseq", header = F) #run with htseq -s yes
+strand_rev <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_exon/M2-1_S5_htseq", header = F) #ran with htseq -s reverse
+strand_yes <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/Str_Yes/M2-1_S5_htseq", header = F) #ran with htseq -s yes
 
 
 #merging dataset for plot
@@ -74,3 +74,33 @@ max(merged_red$V2.y)
 ```
 
     ## [1] 29486
+
+# Choosing gene versus exon counts
+
+``` r
+strand_revG <- read.table("/media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles/highQual_gene/M2-1_S5_htseq", header = F) #ran with htseq -s reverse
+
+#merging dataset for decision
+merged <- merge(strand_rev, strand_revG, by = "V1")
+
+merged$diff <- merged$V2.x-merged$V2.y
+head(merged)
+```
+
+    ##                       V1    V2.x    V2.y diff
+    ## 1 __alignment_not_unique 2822659 2822659    0
+    ## 2            __ambiguous  188782  188782    0
+    ## 3             CPIJ000001       0       0    0
+    ## 4             CPIJ000002     146     146    0
+    ## 5             CPIJ000003       0       0    0
+    ## 6             CPIJ000004     160     160    0
+
+``` r
+sum(merged$diff)
+```
+
+    ## [1] 0
+
+``` r
+#no diff here, so using exon dataset.
+```
