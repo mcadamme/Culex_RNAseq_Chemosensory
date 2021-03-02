@@ -3,6 +3,8 @@
 
 cd /media/megan/EE9C16C89C168AEB/Noreuil/trimmed_pairs/DGE_GenAligned_SamFiles
 
+
+##Used unmarked bam files for RNA-seq
 for sample in *.sam
 do
 	echo $sample
